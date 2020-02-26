@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  h1= "Velemenyek"
+  table
+    thead
+      tr
+        th id
+        th nev/jelige
+        th valasz
+        th timestamp
+    tbody
+      each answer, i in answers
+        tr
+          td= i
+          td= answer["name"]
+          td= answer["answer"]
+          td= answer["timestamp"].toDate().toLocaleString()

@@ -1,6 +1,6 @@
 var firebase = require("firebase");
-const express = require('express');
-const app = express();
+var express = require('express');
+var router = express.Router();
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -24,6 +24,7 @@ table.get()
   .then((snapshot) => {
     snapshot.forEach((doc) => {
         answers[doc.id] = []
+        console.log(doc.id);
         let answersRef = table.doc(doc.id).collection("answers");
         answersRef.get()
           .then((_answers) => {
@@ -36,32 +37,13 @@ table.get()
 
 // TODO: JSON to CSV
 
-app.get('/', (req, res) => {
-  var response = ["<!DOCTYPE html><html><head>",
-    "<style>table {width: 75%; border: 1px solid black; border-collapse: collapse; }</style>",
-    "</head><body><table><tr><th>question</th><th>name</th><th>answer</th></tr>"];
-  Object.keys(answers).forEach((key) => {
-    answers[key].forEach((ans) => {
-      response.push(
-        "<tr>",
-        "<td>" + key + "</td>",
-        "<td>" + ans["name"] + "</td>",
-        "<td>" + ans["answer"] + "</td>",
-        "<td>" + ans["timestamp"].toDate().toLocaleString() + "</td>",
-        "</tr>",
-      );
-    });
-  });
-  response.push("</table></body></html>");
-  res.send(response.join(""));
+/* GET answers listing. */
+router.get('/', function(req, res, next) {
+  // e.g. send "hasznos" for now
+  res.render('export', {answers: answers["hasznos"]});
 });
 
-app.listen(8000, () => {
-  console.log('export app listening on port 8000')
-});
-
-
-
+module.exports = router;
 
 
 

@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1= "Esemenyek"
+  each event, id in events
+    a(href='/export/#{id}') #{id}
+    br

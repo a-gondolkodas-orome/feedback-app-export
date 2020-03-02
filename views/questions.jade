@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  a(href='/export') Back
+  
+  h1= "Kerdesek"
+
+  each question, id in questions
+    a(href='/export/#{eventId}/#{id}') #{id}
+    br

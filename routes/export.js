@@ -17,21 +17,30 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
 const table = db.collection("events").doc("mamut-2019-szervezo").collection("questions");
+const events = db.collection('events');
+
+
+// Retrieve data from firebase
 
 let answers = {}
 
-table.get()
-  .then((snapshot) => {
-    snapshot.forEach((doc) => {
-        answers[doc.id] = []
-        console.log(doc.id);
-        let answersRef = table.doc(doc.id).collection("answers");
-        answersRef.get()
-          .then((_answers) => {
-            _answers.forEach((answer) => {
-              answers[doc.id].push(answer.data());
-            });
-          });
+events.get()
+  .then((_events) => {
+    _events.forEach((eventDoc) => {
+      answers[eventDoc.id] = {};
+      questionCollection = events.doc(eventDoc.id).collection('questions');
+      questionCollection.get()
+        .then((_questions) => {
+          _questions.forEach((questionDoc) => {
+            answers[eventDoc.id][questionDoc.id] = [];
+            questionCollection.doc(questionDoc.id).collection('answers').get()
+              .then((_answers) => {
+                _answers.forEach((answerDoc) => {
+                  answers[eventDoc.id][questionDoc.id].push(answerDoc.data());
+                })
+              })
+          })
+        })
     });
   });
 
@@ -39,8 +48,33 @@ table.get()
 
 /* GET answers listing. */
 router.get('/', function(req, res, next) {
-  // e.g. send "hasznos" for now
-  res.render('export', {answers: answers["hasznos"]});
+  res.render('events', {
+    events: answers
+  });
+});
+
+router.get('/:eventId', function(req, res, next) {
+  if (answers.hasOwnProperty(req.params['eventId'])) {
+    res.render('questions', {
+      eventId: req.params['eventId'],
+      questions: answers[req.params['eventId']]
+    });
+  } else {
+    next();
+  }
+});
+
+router.get('/:eventId/:questionId', function(req, res, next) {
+  if (answers.hasOwnProperty(req.params['eventId'])
+   && answers[req.params['eventId']].hasOwnProperty(req.params['questionId'])) {
+    res.render('answers', {
+      eventId: req.params['eventId'],
+      questionId: req.params['questionId'], // redundant ATM
+      answers: answers[req.params['eventId']][req.params['questionId']]
+    });
+  } else {
+    next();
+  }
 });
 
 module.exports = router;

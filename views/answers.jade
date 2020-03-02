@@ -13,9 +13,9 @@ block content
         th valasz
         th timestamp
     tbody
-      each answer, i in answers
+      each answer, id in answers
         tr
-          td= i
+          td= id
           td= answer["name"]
           td= answer["answer"]
           td= answer["timestamp"].toDate().toLocaleString()

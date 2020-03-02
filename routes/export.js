@@ -5,20 +5,20 @@ var router = express.Router();
 // TODO: JSON to CSV
 
 // GET events listing.
-router.get('/', function(req, res, next) {
-  answers = data.getAnswers();
+router.get('/', async (req, res, next) => {
+  events = await data.retrieveEventRefs();
   res.render('events', {
-    events: answers
+    events: events
   });
 });
 
 // GET questions listing.
-router.get('/:eventId', function(req, res, next) {
-  answers = data.getAnswers();
-  if (answers.hasOwnProperty(req.params['eventId'])) {
+router.get('/:eventId', async (req, res, next) => {
+  questions = await data.retrieveQuestionRefs(req.params['eventId']);
+  if (questions != null) {
     res.render('questions', {
       eventId: req.params['eventId'],
-      questions: answers[req.params['eventId']]
+      questions: questions
     });
   } else {
     // Not found
@@ -27,14 +27,13 @@ router.get('/:eventId', function(req, res, next) {
 });
 
 // GET answers listing.
-router.get('/:eventId/:questionId', function(req, res, next) {
-  answers = data.getAnswers();
-  if (answers.hasOwnProperty(req.params['eventId'])
-   && answers[req.params['eventId']].hasOwnProperty(req.params['questionId'])) {
+router.get('/:eventId/:questionId', async (req, res, next) => {
+  answers = await data.retrieveAnswerRefs(req.params['eventId'], req.params['questionId']);
+  if (answers != null) {
     res.render('answers', {
       eventId: req.params['eventId'],
       questionId: req.params['questionId'], // redundant ATM
-      answers: answers[req.params['eventId']][req.params['questionId']]
+      answers: answers
     });
   } else {
     // Not found

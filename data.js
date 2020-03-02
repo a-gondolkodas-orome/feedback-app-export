@@ -13,12 +13,13 @@ firebase.initializeApp(firebaseConfig);
 
 // Get a database reference to our posts
 var db = firebase.firestore();
-var events = db.collection('events');
 
+// caching TODO: plan caching
 var answers = {};
 
 // Retrieve data from firebase
 // Fill up answers data structure
+// NOT-IN-USE AT THE MOMENT
 function retrieveData() {
 
   console.log('retrieving data...');
@@ -57,8 +58,79 @@ function retrieveData() {
 
 }
 
-// NOTE: this counts as #docs reads in the firestore billing ~1.2K currently
-retrieveData();
+async function retrieveEventRefs() {
+  return new Promise(resolve => {
+    events = {};
+    console.log('retrieving events');
+    db.collection('events').get()
+      .then((eventsSnapshot) => {
+        eventsSnapshot.forEach((eventDoc) => (events[eventDoc.id] = eventDoc));
+        console.log('events retrieved');
+        resolve(events);
+      })
+      .catch((error) => (console.log(error)));
+  });
+}
+
+async function retrieveQuestionRefs(eventId) {
+  return new Promise(resolve => {
+    questions = {};
+    console.log('retrieving questions: ' + eventId);
+    db.collection('events').doc(eventId).get()
+      .then((eventDoc) => {
+        if (eventDoc.exists) {
+          db.collection('events').doc(eventId).collection('questions').get()
+            .then((questionsSnapshot) => {
+              questionsSnapshot.forEach((questionDoc) => (questions[questionDoc.id] = questionDoc));
+              console.log('questions retrieved');
+              resolve(questions);
+            })
+            .catch((error) => {
+              console.log(error);
+              resolve(null);
+            });
+        } else {
+          console.log('event ' + eventId + ' does not exists');
+          resolve(null);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        resolve(null);
+      });
+  });
+}
+
+async function retrieveAnswerRefs(eventId, questionId) {
+  return new Promise(resolve => {
+    console.log('retrieving answers: ' + eventId + '.' + questionId);
+    db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
+      .then((questionDoc) => {
+        if (questionDoc.exists) {
+          db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').get()
+            .then((answersSnapshot) => {
+              if (!answers.hasOwnProperty(eventId))
+                answers[eventId] = {}
+              if (!answers[eventId].hasOwnProperty(questionId))
+                answers[eventId][questionId] = {}
+              answersSnapshot.forEach((answerDoc) => {
+                answers[eventId][questionId][answerDoc.id] = answerDoc.data();
+              });
+              console.log('answers retrieved');
+              resolve(answers[eventId][questionId]);
+            })
+            .catch((error) => {
+              console.log(error);
+              resolve(null);
+            });
+        } else {
+          console.log('question ' + eventId + '.' + questionId + ' does not exists');
+          resolve(null);
+        }
+      });
+  });
+}
+
 
 
 function getAnswers() {
@@ -66,4 +138,4 @@ function getAnswers() {
 }
 
 
-module.exports = {retrieveData, getAnswers};
+module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs};

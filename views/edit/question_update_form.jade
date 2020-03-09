@@ -1,0 +1,24 @@
+extends ../layout
+
+block content
+  h1= "Kerdes modositasa"
+  
+  form(method='POST' action='')
+    div.form-group
+      label(for='text') Text:
+      input(type='text', name='text', placeholder='asd', value=question['text'])
+    div.form-group
+      label(for='type') Type:
+      select(type='select', name='type', value=question['type'])
+        option(value='scale3') scale3
+        option(value='scale5') scale5
+        option(value='scale10') scale10
+        option(value='wordcloud') wordcloud
+        option(value='textbox') textbox
+
+    div.form-group
+      label(for='words') Words:
+      input(type='text', name='words', placeholder='[sth,sth]', value=(undefined===question['words'] ? '' : question['words']))
+
+    button.btn.btn-primary(type='submit') Modosit
+

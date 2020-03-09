@@ -7,7 +7,7 @@ var router = express.Router();
 // GET events listing.
 router.get('/', async (req, res, next) => {
   events = await data.retrieveEventRefs();
-  res.render('events', {
+  res.render('export/events', {
     events: events
   });
 });
@@ -16,7 +16,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:eventId', async (req, res, next) => {
   questions = await data.retrieveQuestionRefs(req.params['eventId']);
   if (questions != null) {
-    res.render('questions', {
+    res.render('export/questions', {
       eventId: req.params['eventId'],
       questions: questions
     });
@@ -30,7 +30,7 @@ router.get('/:eventId', async (req, res, next) => {
 router.get('/:eventId/:questionId', async (req, res, next) => {
   answers = await data.retrieveAnswerRefs(req.params['eventId'], req.params['questionId']);
   if (answers != null) {
-    res.render('answers', {
+    res.render('export/answers', {
       eventId: req.params['eventId'],
       questionId: req.params['questionId'], // redundant ATM
       answers: answers

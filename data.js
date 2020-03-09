@@ -131,6 +131,38 @@ async function retrieveAnswerRefs(eventId, questionId) {
   });
 }
 
+async function retrieveEventData(eventId) {
+  return new Promise(resolve => {
+    console.log('retrieving data for event ' + eventId);
+    db.collection('events').doc(eventId).get()
+      .then((eventDoc) => {
+        if (eventDoc.exists) {
+          resolve(eventDoc.data());
+        } else {
+          resolve(null);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        resolve(null);
+      })
+  })
+}
+
+async function retrieveSingleQuestion(eventId, questionId) {
+  return new Promise(resolve => {
+    console.log('retrieving question data: ' + eventId + '.' + questionId);
+    db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
+      .then((questionDoc) => {
+        if (questionDoc.exists) {
+          resolve(questionDoc.data());
+        } else {
+          resolve(null);
+        }
+      })
+  })
+}
+
 
 
 function getAnswers() {
@@ -138,4 +170,4 @@ function getAnswers() {
 }
 
 
-module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs};
+module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData, retrieveSingleQuestion};

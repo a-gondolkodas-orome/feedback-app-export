@@ -1,0 +1,16 @@
+extends ../layout
+
+block content
+  a(href='/edit') Back
+  
+  h1= "Kerdesek modositasa"
+
+  each question, id in questions
+    a(href='/edit/#{eventId}/#{id}') #{id}
+    br
+
+  br
+  a(href='/edit/#{eventId}/createQuestion')= "Uj kerdes"
+
+  br
+  a(href='/edit/#{eventId}/editEvent')= "Esemeny modositasa"

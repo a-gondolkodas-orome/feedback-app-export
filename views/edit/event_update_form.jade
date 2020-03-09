@@ -1,0 +1,24 @@
+extends ../layout
+
+block content
+  h1= "Esemeny modositasa"
+  
+  form(method='POST' action='')
+    div.form-group
+      label(for='code') Kod:
+      input(type='text', name='code', placeholder='1234', value=event['code'])
+    div.form-group
+      label(for='name') Nev:
+      input(type='text', name='name', placeholder='nev', value=event['name'])
+    div.form-group
+      label(for='freq') Frekvencia
+      input(type='number', name='freq', placeholder='0', value=event['frequency'])
+    div.form-group
+      label(for='from') Mettol
+      input(type='datetime-local', name='from', value=event['from'].toDate().toLocaleString())
+    div.form-group
+      label(for='until') Meddig
+      input(type='datetime-local', name='until', value=event['until'].toDate().toLocaleString())
+
+    button.btn.btn-primary(type='submit') Modosit
+

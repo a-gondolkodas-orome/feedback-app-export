@@ -2,9 +2,15 @@ extends ../layout
 
 block content
   h1= "Esemenyek modositasa"
-  each event, id in events
-    a(href='/edit/#{id}') #{id}
-    br
 
-  br
   a(href='/edit/createEvent') Uj esemeny
+  br
+  br
+
+  table
+    thead
+    tbody
+      each event, id in events
+        tr
+          td(class='click')
+            a(href='/edit/#{id}') #{id}

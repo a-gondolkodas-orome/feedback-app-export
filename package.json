@@ -20,6 +20,7 @@
     "firebase": "^7.9.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "json2csv": "^4.5.4",
     "moment": "^2.24.0",
     "morgan": "~1.9.1"
   },

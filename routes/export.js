@@ -1,4 +1,5 @@
 var data = require('../data');
+var parser = require('json2csv');
 var express = require('express');
 var router = express.Router();
 
@@ -25,6 +26,18 @@ router.get('/:eventId', async (req, res, next) => {
     next();
   }
 });
+
+// GET event CSV export
+router.get('/:eventId/csvExport', async (req, res, next) => {
+  eventJSON = await data.retrieveEventJSON(req.params['eventId']);
+  if (eventJSON == null) {
+    res.status(404).send('No event found.');
+  }
+  const fields = ['questionId', 'answers.answer', 'answers.name', 'answers.timestamp'];
+  let csv = parser.parse(eventJSON, { fields, unwind: 'answers' });
+  res.attachment(req.params['eventId'] + '.csv');
+  res.send(csv);
+})
 
 // GET answers listing.
 router.get('/:eventId/:questionId', async (req, res, next) => {

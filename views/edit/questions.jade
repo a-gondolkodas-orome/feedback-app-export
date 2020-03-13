@@ -5,12 +5,19 @@ block content
   
   h1= "Kerdesek modositasa"
 
-  each question, id in questions
-    a(href='/edit/#{eventId}/#{id}') #{id}
-    br
-
-  br
   a(href='/edit/#{eventId}/createQuestion')= "Uj kerdes"
-
   br
+  br
+
   a(href='/edit/#{eventId}/editEvent')= "Esemeny modositasa"
+  br
+  br
+
+  table
+    thead
+    tbody
+      each question, id in questions
+        tr
+          td(class='clickable')
+            a(href='/edit/#{eventId}/#{id}') #{id}
+

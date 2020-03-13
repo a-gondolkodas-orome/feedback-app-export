@@ -2,6 +2,11 @@ extends ../layout
 
 block content
   h1= "Esemenyek"
-  each event, id in events
-    a(href='/export/#{id}') #{id}
-    br
+
+  table
+    thead
+    tbody
+      each event, id in events
+        tr
+          td(class='click')
+            a(href='/export/#{id}') #{id}

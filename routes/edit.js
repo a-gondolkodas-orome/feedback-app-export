@@ -3,6 +3,8 @@ var { body,validationResult,sanitizeBody } = require('express-validator');
 var express = require('express');
 var router = express.Router();
 
+// TODO: validation and sanitazitaion with express-validator
+
 // GET events listing.
 router.get('/', async (req, res, next) => {
   events = await data.retrieveEventRefs();

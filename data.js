@@ -14,48 +14,64 @@ firebase.initializeApp(firebaseConfig);
 // Get a database reference to our posts
 var db = firebase.firestore();
 
-// caching TODO: plan caching
-var answers = {};
 
-// Retrieve data from firebase
-// Fill up answers data structure
-// NOT-IN-USE AT THE MOMENT
-function retrieveData() {
-
-  console.log('retrieving data...');
-
-  events.get()
-    .then((_events) => {
-      _events.forEach((eventDoc) => {
-        // now for testing just use sample to decrease reads from firebase
-        if (eventDoc.id == 'mamut-2019-szervezo' || eventDoc.id == 'test') return;
-        answers[eventDoc.id] = {};
-        questionCollection = events.doc(eventDoc.id).collection('questions');
-        questionCollection.get()
-          .then((_questions) => {
-            _questions.forEach((questionDoc) => {
-              answers[eventDoc.id][questionDoc.id] = {};
-              questionCollection.doc(questionDoc.id).collection('answers').get()
-                .then((_answers) => {
-                  _answers.forEach((answerDoc) => {
-                    answers[eventDoc.id][questionDoc.id][answerDoc.id] = answerDoc.data();
-                  });
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
-            });
-          })
-          .catch((error) => {
-            console.log(error);
+function retrieveQuestionJSON(eventId, questionId) {
+  return new Promise(resolve  => {
+    let answers = {
+      questionId: questionId,
+      answers: []
+    };
+    collection = db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers');
+    collection.get()
+      .then((_answers) => {
+        _answers.forEach((answerDoc) => {
+          answers['answers'].push({
+            answer: answerDoc.data()['answer'],
+            name:   answerDoc.data()['name'],
+            timestamp: answerDoc.data()['timestamp'].toDate().toLocaleString()
           });
+        });
+        resolve(answers);
+      })
+      .catch((error) => {
+        console.log(error);
+        resolve(null);
       });
-      console.log('data received');
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  });
+}
 
+
+// Retrieve data in JSON from firebase
+function retrieveEventJSON(eventId) {
+  console.log('retrieving JSON data for', eventId);
+  return new Promise(resolve => {
+    answersArray = [];
+
+    event = db.collection('events').doc(eventId);
+    event.get()
+      .then((eventDoc) => {
+        if (eventDoc.exists) {
+          event.collection('questions').get()
+            .then((_questions) => {
+              questionJSONPromises = []
+              _questions.forEach((questionDoc) => {
+                questionJSONPromises.push(
+                  retrieveQuestionJSON(eventId, questionDoc.id)
+                );
+              });
+              Promise.all(questionJSONPromises).then(resolve);
+            })
+            .catch((error) => {
+              console.log(error);
+              resolve(null);
+            });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        resolve(null);
+      });
+  });
 }
 
 async function retrieveEventRefs() {
@@ -170,4 +186,4 @@ function getAnswers() {
 }
 
 
-module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData, retrieveSingleQuestion};
+module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData, retrieveSingleQuestion, retrieveEventJSON};

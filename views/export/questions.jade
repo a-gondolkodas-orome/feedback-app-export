@@ -5,6 +5,14 @@ block content
   
   h1= "Kerdesek"
 
-  each question, id in questions
-    a(href='/export/#{eventId}/#{id}') #{id}
-    br
+  a(href='/export/#{eventId}/csvExport', download='data') Esemeny exportalasa CSV-kent
+  br
+  br
+
+  table
+    thead
+    tbody
+      each question, id in questions
+        tr
+          td(class='clickable')
+            a(href='/export/#{eventId}/#{id}') #{id}

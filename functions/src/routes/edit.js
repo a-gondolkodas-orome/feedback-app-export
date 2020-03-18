@@ -36,7 +36,7 @@ router.post('/:eventId/editEvent', async (req, res, next) => {
   untilDate = new Date(Date.parse(req.body['until']));
 //  console.log('from is', new Date(Date.parse(req.body['from'])).toLocaleString());
   data.updateExistingEvent(req.params['eventId'], req.body);
-  return res.redirect('/edit');
+  return res.redirect('./');
 })
 
 // GET event create form
@@ -51,7 +51,7 @@ router.get('/createEvent', (req, res, next) => {
 router.post('/createEvent', (req, res, next) => {
   console.log('event to create', req.body);
   data.addNewEvent(req.body);
-  return res.redirect('/edit');
+  return res.redirect('./');
 })
 
 // GET questions listing.
@@ -81,7 +81,7 @@ router.get('/:eventId/createQuestion', (req, res, next) => {
 router.post('/:eventId/createQuestion', (req, res, next) => {
   console.log('question to add', req.body);
   data.addNewQuestion(req.params['eventId'], req.body);
-  return res.redirect('/edit/'+req.params['eventId']);
+  return res.redirect('..');
 })
 
 // GET question update form.
@@ -104,7 +104,7 @@ router.get('/:eventId/:questionId', async (req, res, next) => {
 router.post('/:eventId/:questionId', async (req, res, next) => {
   console.log('POSTed ' + req.body['text'] + ' ' + req.body['type']);
   data.updateExistingQuestion(req.params['eventId'], req.params['questionId'], req.body);
-  return res.redirect('/edit/'+req.params['eventId']);
+  return res.redirect('../');
 })
 
 

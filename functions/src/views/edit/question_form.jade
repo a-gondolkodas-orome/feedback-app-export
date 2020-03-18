@@ -7,7 +7,7 @@ block content
 
   h1= "Esemény "+eventId+"; Kérdés "+((mode === "create") ? "hozzáadása" : questionId+" módosítása")
   
-  form(method='POST' action='')
+  form(method='POST' action='.')
     if (mode === "create")
       div.form-group
       label(for='id') Id:

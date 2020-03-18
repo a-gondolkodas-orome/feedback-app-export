@@ -197,7 +197,7 @@ async function retrieveSingleQuestion(eventId, questionId) {
 
 
 async function addNewEvent(event) {
-  db.collection('events').doc(event['id']).set({
+  return db.collection('events').doc(event['id']).set({
     code: event['code'],
     name: event['name'],
     frequency: parseInt(event['freq']),
@@ -239,7 +239,7 @@ async function addNewQuestion(eventId, question) {
     data['words'] = question['words'].split(', ');
   }
   let doc = db.collection('events').doc(eventId).collection('questions').doc(question['id']);
-  doc.set(data)
+  return doc.set(data)
   .then(() => {
     return console.log('new question added:', question['id']);
   })
@@ -257,7 +257,7 @@ async function updateExistingQuestion(eventId, questionId, question) {
   if (question['type'] === 'wordcloud') {
     data['words'] = question['words'].split(', ');
   }
-  db.collection('events').doc(eventId).collection('questions').doc(questionId).update(data)
+  return db.collection('events').doc(eventId).collection('questions').doc(questionId).update(data)
   .then(() => {
     return console.log('existing question updated', eventId+'.'+questionId);
   })
@@ -267,4 +267,16 @@ async function updateExistingQuestion(eventId, questionId, question) {
 }
 
 
-module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData, retrieveSingleQuestion, retrieveEventJSON, addNewEvent, updateExistingEvent, addNewQuestion, updateExistingQuestion};
+async function deleteEvent(eventId) {
+  // NOTE: data is still accessible in console but doesn't show up in queries, although I couldn't find in console...
+  return db.collection('events').doc(eventId).delete();
+}
+
+function deleteQuestion(eventId, questionId) {
+  // NOTE: data is still accessible in console but doesn't show up in queries, although I couldn't find in console...
+  return db.collection('events').doc(eventId).collection('questions').doc(questionId).delete();
+}
+
+
+
+module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData, retrieveSingleQuestion, retrieveEventJSON, addNewEvent, updateExistingEvent, addNewQuestion, updateExistingQuestion, deleteEvent, deleteQuestion};

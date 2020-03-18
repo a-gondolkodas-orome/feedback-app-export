@@ -33,3 +33,7 @@ block content
       input(type='text', name='words', multiple=true, placeholder='alma, korte', value= (undefined === data['words']) ? '' : data['words'].join(', '))
 
     button.btn.btn-primary(type='submit', id='navigate')= (mode === "create") ? "Hozzáad" : "Módosít"
+
+
+  form(method='POST' action='./deleteQuestion/')
+    button.btn.btn-danger.del(type='submit', id='navigate', onclick="return confirm('Biztosan törölni akarod a kérdést? Minden adat el fog veszni!');", style='background-color: red')= 'Törlés'

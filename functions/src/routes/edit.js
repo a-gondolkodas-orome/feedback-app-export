@@ -4,7 +4,6 @@ var express = require('express');
 var router = express.Router();
 
 // TODO: validation and sanitazitaion with express-validator
-// TODO: delete events + questions
 
 // GET events listing.
 router.get('/', async (req, res, next) => {
@@ -32,11 +31,8 @@ router.get('/:eventId/editEvent', async (req, res, next) => {
 // POST event update form
 router.post('/:eventId/editEvent', async (req, res, next) => {
   console.log('POSTed: ', req.body);
-  fromDate = new Date(Date.parse(req.body['from']));
-  untilDate = new Date(Date.parse(req.body['until']));
-//  console.log('from is', new Date(Date.parse(req.body['from'])).toLocaleString());
-  data.updateExistingEvent(req.params['eventId'], req.body);
-  return res.redirect('./');
+  await data.updateExistingEvent(req.params['eventId'], req.body);
+  return res.redirect('../');
 })
 
 // GET event create form
@@ -47,11 +43,18 @@ router.get('/createEvent', (req, res, next) => {
   });
 })
 
+// POST event delete form
+router.post('/:eventId/deleteEvent', async (req, res, next) => {
+  console.log('event to delete:', req.params['eventId']);
+  await data.deleteEvent(req.params['eventId']);
+  return res.redirect('../..');
+})
+
 // POST event create form
-router.post('/createEvent', (req, res, next) => {
+router.post('/createEvent', async (req, res, next) => {
   console.log('event to create', req.body);
-  data.addNewEvent(req.body);
-  return res.redirect('./');
+  await data.addNewEvent(req.body);
+  return res.redirect('../');
 })
 
 // GET questions listing.
@@ -78,10 +81,17 @@ router.get('/:eventId/createQuestion', (req, res, next) => {
 })
 
 // POST question create form
-router.post('/:eventId/createQuestion', (req, res, next) => {
+router.post('/:eventId/createQuestion', async (req, res, next) => {
   console.log('question to add', req.body);
-  data.addNewQuestion(req.params['eventId'], req.body);
+  await data.addNewQuestion(req.params['eventId'], req.body);
   return res.redirect('..');
+})
+
+// POST question delete form
+router.post('/:eventId/:questionId/deleteQuestion', async (req, res, next) => {
+  console.log('question to delete:', req.params['questionId']);
+  await data.deleteQuestion(req.params['eventId'], req.params['questionId']);
+  return res.redirect('../..');
 })
 
 // GET question update form.
@@ -103,7 +113,7 @@ router.get('/:eventId/:questionId', async (req, res, next) => {
 // POST question update form.
 router.post('/:eventId/:questionId', async (req, res, next) => {
   console.log('POSTed ' + req.body['text'] + ' ' + req.body['type']);
-  data.updateExistingQuestion(req.params['eventId'], req.params['questionId'], req.body);
+  await data.updateExistingQuestion(req.params['eventId'], req.params['questionId'], req.body);
   return res.redirect('../');
 })
 

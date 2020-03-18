@@ -1,16 +1,16 @@
 extends ../layout
 
 block content
-  a(href='/export/#{eventId}') Back
+  a(id='navigate', href='.') Vissza
 
-  h1= "Velemenyek"
+  h1= "Vélemények"
 
   table
     thead
       tr
         th id
-        th nev/jelige
-        th valasz
+        th név/jelige
+        th válasz
         th timestamp
     tbody
       each answer, id in answers

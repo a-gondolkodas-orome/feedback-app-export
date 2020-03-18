@@ -14,6 +14,7 @@ firebase.initializeApp(firebaseConfig);
 // Get a database reference to our posts
 var db = firebase.firestore();
 
+// TODO: refactor nested promises
 
 function retrieveQuestionJSON(eventId, questionId) {
   return new Promise(resolve  => {
@@ -32,6 +33,7 @@ function retrieveQuestionJSON(eventId, questionId) {
           });
         });
         resolve(answers);
+        return console.log(eventId+'.'+questionId, 'JSON retrieved');
       })
       .catch((error) => {
         console.log(error);
@@ -59,13 +61,14 @@ function retrieveEventJSON(eventId) {
                   retrieveQuestionJSON(eventId, questionDoc.id)
                 );
               });
-              Promise.all(questionJSONPromises).then(resolve);
+              return Promise.all(questionJSONPromises).then(resolve).catch((error) => {console.log(error); resolve(null);});
             })
             .catch((error) => {
               console.log(error);
               resolve(null);
             });
         }
+        return;
       })
       .catch((error) => {
         console.log(error);
@@ -81,8 +84,8 @@ async function retrieveEventRefs() {
     db.collection('events').get()
       .then((eventsSnapshot) => {
         eventsSnapshot.forEach((eventDoc) => (events[eventDoc.id] = eventDoc));
-        console.log('events retrieved');
         resolve(events);
+        return console.log('events retrieved');
       })
       .catch((error) => (console.log(error)));
   });
@@ -98,8 +101,8 @@ async function retrieveQuestionRefs(eventId) {
           db.collection('events').doc(eventId).collection('questions').get()
             .then((questionsSnapshot) => {
               questionsSnapshot.forEach((questionDoc) => (questions[questionDoc.id] = questionDoc));
-              console.log('questions retrieved');
               resolve(questions);
+              return console.log('questions retrieved');
             })
             .catch((error) => {
               console.log(error);
@@ -109,6 +112,7 @@ async function retrieveQuestionRefs(eventId) {
           console.log('event ' + eventId + ' does not exists');
           resolve(null);
         }
+        return;
       })
       .catch((error) => {
         console.log(error);
@@ -120,6 +124,7 @@ async function retrieveQuestionRefs(eventId) {
 async function retrieveAnswerRefs(eventId, questionId) {
   return new Promise(resolve => {
     console.log('retrieving answers: ' + eventId + '.' + questionId);
+    answers = {}
     db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
       .then((questionDoc) => {
         if (questionDoc.exists) {
@@ -132,8 +137,8 @@ async function retrieveAnswerRefs(eventId, questionId) {
               answersSnapshot.forEach((answerDoc) => {
                 answers[eventId][questionId][answerDoc.id] = answerDoc.data();
               });
-              console.log('answers retrieved');
               resolve(answers[eventId][questionId]);
+              return console.log('answers retrieved');
             })
             .catch((error) => {
               console.log(error);
@@ -143,6 +148,11 @@ async function retrieveAnswerRefs(eventId, questionId) {
           console.log('question ' + eventId + '.' + questionId + ' does not exists');
           resolve(null);
         }
+        return;
+      })
+      .catch((error) => {
+        console.log(error);
+        resolve(null);
       });
   });
 }
@@ -154,8 +164,10 @@ async function retrieveEventData(eventId) {
       .then((eventDoc) => {
         if (eventDoc.exists) {
           resolve(eventDoc.data());
+          return console.log('event data retrieved:', eventId);
         } else {
           resolve(null);
+          return console.log('event data could not be retrieved', eventId);
         }
       })
       .catch((error) => {
@@ -175,15 +187,84 @@ async function retrieveSingleQuestion(eventId, questionId) {
         } else {
           resolve(null);
         }
+        return;
+      })
+      .catch((error) => {
+        console.log(error);
       })
   })
 }
 
 
+async function addNewEvent(event) {
+  db.collection('events').doc(event['id']).set({
+    code: event['code'],
+    name: event['name'],
+    frequency: parseInt(event['freq']),
+    from: new Date(Date.parse(event['from'])),
+    until: new Date(Date.parse(event['until']))
+  })
+  .then(() => {
+    return console.log('new event added:', event['id']);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+}
 
-function getAnswers() {
-  return answers;
+async function updateExistingEvent(eventId, event) {
+  db.collection('events').doc(eventId).update({
+    code: event['code'],
+    name: event['name'],
+    frequency: parseInt(event['freq']),
+    from: new Date(Date.parse(event['from'])),
+    until: new Date(Date.parse(event['until']))
+  })
+  .then(() => {
+    return console.log('existing event updated:', eventId);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 }
 
 
-module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData, retrieveSingleQuestion, retrieveEventJSON};
+async function addNewQuestion(eventId, question) {
+  let data = {
+      order: parseInt(question['order']),
+      text:  question['text'],
+      type:  question['type'],
+  };
+  if (question['type'] === 'wordcloud') {
+    data['words'] = question['words'].split(', ');
+  }
+  let doc = db.collection('events').doc(eventId).collection('questions').doc(question['id']);
+  doc.set(data)
+  .then(() => {
+    return console.log('new question added:', question['id']);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+}
+
+async function updateExistingQuestion(eventId, questionId, question) {
+  let data = {
+    order: parseInt(question['order']),
+    text:  question['text'],
+    type:  question['type'],
+  }
+  if (question['type'] === 'wordcloud') {
+    data['words'] = question['words'].split(', ');
+  }
+  db.collection('events').doc(eventId).collection('questions').doc(questionId).update(data)
+  .then(() => {
+    return console.log('existing question updated', eventId+'.'+questionId);
+  })
+  .catch((error) => {
+    console.log(error);
+  })
+}
+
+
+module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData, retrieveSingleQuestion, retrieveEventJSON, addNewEvent, updateExistingEvent, addNewQuestion, updateExistingQuestion};

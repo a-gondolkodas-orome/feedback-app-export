@@ -1,0 +1,35 @@
+extends ../layout
+
+block content
+  a(id='navigate', href='..') Vissza
+  br
+  br
+
+  h1= "Esemény "+eventId+"; Kérdés "+((mode === "create") ? "hozzáadása" : questionId+" módosítása")
+  
+  form(method='POST' action='')
+    if (mode === "create")
+      div.form-group
+      label(for='id') Id:
+      input(type='text', name='id')
+
+    div.form-group
+      label(for='order') Order:
+      input(type='number', name='order', value= (undefined === data['order']) ? 0 : data['order'])
+    div.form-group
+      label(for='text') Text:
+      input(type='text', name='text', value= (undefined === data['text']) ? '' : data['text'])
+    div.form-group
+      label(for='type') Type:
+      select(type='select', name='type', id='type', data-selected= (undefined === data['type']) ? 'textbox' : data['type'])
+        option(value='scale3', selected= (data['type']==='scale3')) scale3
+        option(value='scale5', selected= (data['type']==='scale5')) scale5
+        option(value='scale10',selected= (data['type']==='scale10')) scale10
+        option(value='wordcloud', selected= (data['type']==='wordcloud')) wordcloud
+        option(value='textbox', selected= (data['type']==='textbox')) textbox
+
+    div.form-group
+      label(for='words') Words (csak ha wordcloud):
+      input(type='text', name='words', multiple=true, placeholder='alma, korte', value= (undefined === data['words']) ? '' : data['words'].join(', '))
+
+    button.btn.btn-primary(type='submit', id='navigate')= (mode === "create") ? "Hozzáad" : "Módosít"

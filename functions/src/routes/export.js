@@ -7,8 +7,9 @@ var router = express.Router();
 
 // GET events listing.
 router.get('/', async (req, res, next) => {
+  console.log('rq url was', req.originalUrl);
   events = await data.retrieveEventRefs();
-  res.render('export/events', {
+  return res.render('export/events', {
     events: events
   });
 });
@@ -16,41 +17,41 @@ router.get('/', async (req, res, next) => {
 // GET questions listing.
 router.get('/:eventId', async (req, res, next) => {
   questions = await data.retrieveQuestionRefs(req.params['eventId']);
-  if (questions != null) {
-    res.render('export/questions', {
+  if (questions !== null) {
+    return res.render('export/questions', {
       eventId: req.params['eventId'],
       questions: questions
     });
   } else {
     // Not found
-    next();
+    return next();
   }
 });
 
 // GET event CSV export
 router.get('/:eventId/csvExport', async (req, res, next) => {
   eventJSON = await data.retrieveEventJSON(req.params['eventId']);
-  if (eventJSON == null) {
-    res.status(404).send('No event found.');
+  if (eventJSON === null) {
+    return res.status(404).send('No event found.');
   }
   const fields = ['questionId', 'answers.answer', 'answers.name', 'answers.timestamp'];
   let csv = parser.parse(eventJSON, { fields, unwind: 'answers' });
   res.attachment(req.params['eventId'] + '.csv');
-  res.send(csv);
+  return res.send(csv);
 })
 
 // GET answers listing.
 router.get('/:eventId/:questionId', async (req, res, next) => {
   answers = await data.retrieveAnswerRefs(req.params['eventId'], req.params['questionId']);
-  if (answers != null) {
-    res.render('export/answers', {
+  if (answers !== null) {
+    return res.render('export/answers', {
       eventId: req.params['eventId'],
       questionId: req.params['questionId'], // redundant ATM
       answers: answers
     });
   } else {
     // Not found
-    next();
+    return next();
   }
 });
 

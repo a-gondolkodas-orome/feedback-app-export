@@ -1,0 +1,33 @@
+extends ../layout
+
+block content
+  a(id='navigate', href='..') Vissza
+  br
+  br
+
+  h1= (mode === "create") ? ("Esemény hozzáadása") : ("Esemény "+eventId+" módosítása")
+  
+  form(method='POST' action='')
+    if (mode === "create")
+      div.form-group
+      label(for='id') Id:
+      input(type='text', name='id')
+
+    div.form-group
+      label(for='code') Kód:
+      input(type='text', name='code', placeholder='1234', value= (undefined === data['code']) ? '' : data['code'])
+    div.form-group
+      label(for='name') Név:
+      input(type='text', name='name', placeholder='nev', value= (undefined === data['name']) ? '' : data['name'])
+    div.form-group
+      label(for='freq') Frekvencia
+      input(type='number', name='freq', placeholder='0', value= (undefined === data['frequency']) ? '' : data['frequency'])
+    div.form-group
+      label(for='from') Mettől
+      input(type='datetime-local', name='from', value= (undefined === data['from']) ? new Date().toLocaleString() : data['from'].toDate().toLocaleString())
+    div.form-group
+      label(for='until') Meddig
+      input(type='datetime-local', name='until', value= (undefined === data['until']) ? new Date().toLocaleString() : data['until'].toDate().toLocaleString())
+
+    button.btn.btn-primary(type='submit', id='navigate')= (mode === "create") ? "Hozzáad" : "Módosít"
+

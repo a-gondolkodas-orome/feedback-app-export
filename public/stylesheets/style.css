@@ -1,19 +1,71 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    background: #ECEFF1;
+    color: rgba(0,0,0,0.87);
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    margin: 5px; padding: 0;
 }
-
-a {
-  color: #00B7FF;
+#message {
+    background: white;
+    max-width: 60%;
+    margin: 100px auto 16px;
+    padding: 32px 24px;
+    border-radius: 3px; 
 }
-
+h1 {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 500;
+    color: rgba(0,0,0,0.6);
+    margin: 0 0 16px;
+}
+p {
+    line-height: 140%;
+    margin: 16px 0 24px;
+    font-size: 14px;
+}
+#navigate {
+    background: #039be5;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+#entry {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+    padding: 0;
+}
 table {
+  margin-left:auto; 
+  margin-right:auto;
   border-collapse: collapse;
   border: 1px solid black;
 }
-
 th, td {
   border: 1px solid black;
   padding: 15px;
   text-align: left;
+  min-width: 150px;
+}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 10%;
+}
+input, select {
+  text-align: left;
+  margin: 15px;
+  padding: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  font-size: 16px;
+  resize: none;
 }

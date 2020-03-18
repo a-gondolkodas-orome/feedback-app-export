@@ -50,6 +50,8 @@ typings/
 # Optional npm cache directory
 .npm
 
+#eslint
+functions/.eslintrc.json
 # Optional eslint cache
 .eslintcache
 
@@ -105,3 +107,10 @@ dist
 
 # MacOS DS_Store file
 .DS_Store
+
+# Firebase
+firebase.json
+.firebase
+.firebaserc
+firebase-debug.log
+

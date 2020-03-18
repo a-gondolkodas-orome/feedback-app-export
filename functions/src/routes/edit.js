@@ -4,11 +4,12 @@ var express = require('express');
 var router = express.Router();
 
 // TODO: validation and sanitazitaion with express-validator
+// TODO: delete events + questions
 
 // GET events listing.
 router.get('/', async (req, res, next) => {
   events = await data.retrieveEventRefs();
-  res.render('edit/events', {
+  return res.render('edit/events', {
     events: events
   });
 });
@@ -16,13 +17,15 @@ router.get('/', async (req, res, next) => {
 // GET event update form
 router.get('/:eventId/editEvent', async (req, res, next) => {
   event = await data.retrieveEventData(req.params['eventId']);
-  if (event != null) {
-    res.render('edit/event_update_form', {
-      event: event
+  if (event !== null) {
+    return res.render('edit/event_form', {
+      eventId: req.params['eventId'],
+      data: event,
+      mode: 'update'
     });
   } else {
     // Not found
-    next();
+    return next();
   }
 });
 
@@ -32,63 +35,76 @@ router.post('/:eventId/editEvent', async (req, res, next) => {
   fromDate = new Date(Date.parse(req.body['from']));
   untilDate = new Date(Date.parse(req.body['until']));
 //  console.log('from is', new Date(Date.parse(req.body['from'])).toLocaleString());
-  next();
+  data.updateExistingEvent(req.params['eventId'], req.body);
+  return res.redirect('/edit');
 })
 
 // GET event create form
 router.get('/createEvent', (req, res, next) => {
-  res.render('edit/event_create_form');
+  return res.render('edit/event_form', {
+    mode: 'create',
+    data: {}
+  });
 })
 
 // POST event create form
 router.post('/createEvent', (req, res, next) => {
   console.log('event to create', req.body);
-  next();
+  data.addNewEvent(req.body);
+  return res.redirect('/edit');
 })
 
 // GET questions listing.
 router.get('/:eventId', async (req, res, next) => {
   questions = await data.retrieveQuestionRefs(req.params['eventId']);
-  if (questions != null) {
-    res.render('edit/questions', {
+  if (questions !== null) {
+    return res.render('edit/questions', {
       eventId: req.params['eventId'],
       questions: questions
     });
   } else {
     // Not found
-    next();
+    return next();
   }
 });
 
 // GET question create form
 router.get('/:eventId/createQuestion', (req, res, next) => {
-  res.render('edit/question_create_form', {
-    eventId: req.params['eventId']
+  return res.render('edit/question_form', {
+    eventId: req.params['eventId'],
+    mode: 'create',
+    data: {}
   })
 })
 
 // POST question create form
 router.post('/:eventId/createQuestion', (req, res, next) => {
   console.log('question to add', req.body);
+  data.addNewQuestion(req.params['eventId'], req.body);
+  return res.redirect('/edit/'+req.params['eventId']);
 })
 
-// GET update form.
+// GET question update form.
 router.get('/:eventId/:questionId', async (req, res, next) => {
     question = await data.retrieveSingleQuestion(req.params['eventId'], req.params['questionId']);
-    if (questions != null) {
-      res.render('edit/question_update_form', {
-        question: question
+    if (question !== null) {
+      return res.render('edit/question_form', {
+        eventId: req.params['eventId'],
+        questionId: req.params['questionId'],
+        data: question,
+        mode: 'update'
       });
     } else {
        // Not found
-      next();
+      return next();
     }
 })
 
-// POST update form.
+// POST question update form.
 router.post('/:eventId/:questionId', async (req, res, next) => {
   console.log('POSTed ' + req.body['text'] + ' ' + req.body['type']);
-  next();
+  data.updateExistingQuestion(req.params['eventId'], req.params['questionId'], req.body);
+  return res.redirect('/edit/'+req.params['eventId']);
 })
 
 

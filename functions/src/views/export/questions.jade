@@ -1,0 +1,18 @@
+extends ../layout
+
+block content
+  a(id='navigate', href='..') Vissza
+  
+  h1= "Kérdések"
+
+  a(id='navigate', href='./csvExport', download='data') Esemény exportálása CSV-ként
+  br
+  br
+
+  table
+    thead
+    tbody
+      each question, id in questions
+        tr
+          td(class='clickable')
+            a(id='entry', href='./#{id}') #{id}

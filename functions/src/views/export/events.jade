@@ -1,7 +1,11 @@
 extends ../layout
 
 block content
-  h1= "Esemenyek"
+  a(id='navigate', href='..') Vissza
+  br
+  br
+
+  h1= "Események"
 
   table
     thead
@@ -9,4 +13,4 @@ block content
       each event, id in events
         tr
           td(class='click')
-            a(href='/export/#{id}') #{id}
+            a(id='entry', href='./#{id}/') #{id}

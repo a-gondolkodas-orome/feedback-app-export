@@ -32,5 +32,6 @@ block content
 
     button.btn.btn-primary(type='submit', id='navigate')= (mode === "create") ? "Hozzáad" : "Módosít"
 
-  form(method='POST' action='../deleteEvent/')
-    button.btn.btn-danger.del(type='submit', id='navigate', onclick="return confirm('Biztosan törölni akarod az eseményt? Minden adat el fog veszni!');", style='background-color: red')= 'Törlés'
+  if (mode !== "create")
+    form(method='POST' action='../deleteEvent/')
+      button.btn.btn-danger.del(type='submit', id='navigate', onclick="return confirm('Biztosan törölni akarod az eseményt? Minden adat el fog veszni!');", style='background-color: red')= 'Törlés'

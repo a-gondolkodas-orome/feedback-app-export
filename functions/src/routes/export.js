@@ -42,11 +42,13 @@ router.get('/:eventId/csvExport', async (req, res, next) => {
 
 // GET answers listing.
 router.get('/:eventId/:questionId', async (req, res, next) => {
+  question = await data.retrieveSingleQuestion(req.params['eventId'], req.params['questionId']);
   answers = await data.retrieveAnswerRefs(req.params['eventId'], req.params['questionId']);
-  if (answers !== null) {
+  if (question !== null && answers !== null) {
     return res.render('export/answers', {
       eventId: req.params['eventId'],
       questionId: req.params['questionId'], // redundant ATM
+      question: question,
       answers: answers
     });
   } else {

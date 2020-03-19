@@ -18,27 +18,32 @@ var db = firebase.firestore();
 
 function retrieveQuestionJSON(eventId, questionId) {
   return new Promise(resolve  => {
-    let answers = {
-      questionId: questionId,
-      answers: []
-    };
-    collection = db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers');
-    collection.get()
-      .then((_answers) => {
-        _answers.forEach((answerDoc) => {
-          answers['answers'].push({
-            answer: answerDoc.data()['answer'],
-            name:   answerDoc.data()['name'],
-            timestamp: answerDoc.data()['timestamp'].toDate().toLocaleString()
+    retrieveSingleQuestion(eventId, questionId).then((questionData) => {
+      let answers = {
+        questionId: questionId,
+        questionText: questionData['text'],
+        answers: []
+      };
+      return db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').get()
+        .then((_answers) => {
+          _answers.forEach((answerDoc) => {
+            answers['answers'].push({
+              answer: answerDoc.data()['answer'],
+              name:   answerDoc.data()['name'],
+              timestamp: answerDoc.data()['timestamp'].toDate().toLocaleString()
+            });
           });
+          resolve(answers);
+          return console.log(eventId+'.'+questionId, 'JSON retrieved');
+        })
+        .catch((error) => {
+          console.log(error);
+          resolve(null);
         });
-        resolve(answers);
-        return console.log(eventId+'.'+questionId, 'JSON retrieved');
-      })
-      .catch((error) => {
-        console.log(error);
-        resolve(null);
-      });
+    }).catch((error) => {
+      console.log(error);
+      resolve(null);
+    });
   });
 }
 

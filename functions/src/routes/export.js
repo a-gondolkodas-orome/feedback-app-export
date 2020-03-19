@@ -34,7 +34,7 @@ router.get('/:eventId/csvExport', async (req, res, next) => {
   if (eventJSON === null) {
     return res.status(404).send('No event found.');
   }
-  const fields = ['questionId', 'answers.answer', 'answers.name', 'answers.timestamp'];
+  const fields = ['questionId', 'questionText', 'answers.answer', 'answers.name', 'answers.timestamp'];
   let csv = parser.parse(eventJSON, { fields, unwind: 'answers' });
   res.attachment(req.params['eventId'] + '.csv');
   return res.send(csv);

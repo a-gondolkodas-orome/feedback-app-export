@@ -231,8 +231,20 @@ async function updateExistingEvent(eventId, event) {
 
 
 async function addNewQuestion(eventId, question) {
+  var order = await db.collection('events').doc(eventId).collection('questions').orderBy('order', 'desc').get()
+    .then((querySnapshot) => {
+      if (querySnapshot.empty) {
+        return 0;
+      } else {
+        return querySnapshot.docs[0].data()['order'] + 1;
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      return 0;
+    });
   let data = {
-      order: parseInt(question['order']),
+      order: order,
       text:  question['text'],
       type:  question['type'],
   };
@@ -251,7 +263,6 @@ async function addNewQuestion(eventId, question) {
 
 async function updateExistingQuestion(eventId, questionId, question) {
   let data = {
-    order: parseInt(question['order']),
     text:  question['text'],
     type:  question['type'],
   }

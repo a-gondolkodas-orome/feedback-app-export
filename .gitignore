@@ -114,5 +114,5 @@ firebase.json
 .firebaserc
 firebase-debug.log
 # API key
-functions/src/firebase.js
+functions/src/service-account-key.json
 

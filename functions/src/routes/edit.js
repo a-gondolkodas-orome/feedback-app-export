@@ -95,10 +95,30 @@ router.post('/:eventId/:questionId/deleteQuestion', async (req, res, next) => {
 })
 
 // POST question change order form
-router.post('/:eventId/:questionId/moveDown', async (req, res, next) => {
-  // ASD... TODO
+router.post('/:eventId/:questionId/changeOrder', async (req, res, next) => {
+  
+  var oldOrder = parseInt(req.body['oldOrder']);
+  var newOrder = parseInt(req.body['newOrder']);
+  var questionRefs = await Promise.all([
+    data.getQuestionRefByOrder(req.params['eventId'], oldOrder),
+    data.getQuestionRefByOrder(req.params['eventId'], newOrder)
+  ]);
 
-  return ;
+  if (questionRefs[0] !== null && questionRefs[1] !== null) {
+    await Promise.all([
+      questionRefs[0].update({
+        order: newOrder
+      }),
+      questionRefs[1].update({
+        order: oldOrder
+      })
+    ]).then(() => console.log('order changed successfully'))
+      .catch((error) => console.log(error));
+  } else {
+    console.log('no matching orders, invalid dataset');
+  }
+
+  return res.redirect('../..');
 })
 
 // GET question update form.

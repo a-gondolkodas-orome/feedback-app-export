@@ -1,10 +1,14 @@
 var firebase = require("firebase");
-var firebaseConfig = require("./firebase");
+var serviceAccount = require('./service-account-key.json');
+var admin = require('firebase-admin');
 
-firebase.initializeApp(firebaseConfig);
+var firebase_app = admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://feedback-app-ago.firebaseio.com'
+});
 
 // Get a database reference to our posts
-var db = firebase.firestore();
+var db = admin.firestore(firebase_app);
 
 // TODO: refactor nested promises
 
@@ -95,7 +99,7 @@ async function retrieveQuestionRefs(eventId) {
     db.collection('events').doc(eventId).get()
       .then((eventDoc) => {
         if (eventDoc.exists) {
-          db.collection('events').doc(eventId).collection('questions').get()
+          db.collection('events').doc(eventId).collection('questions').orderBy('order').get()
             .then((questionsSnapshot) => {
               questionsSnapshot.forEach((questionDoc) => (questions[questionDoc.id] = questionDoc));
               resolve(questions);
@@ -275,5 +279,32 @@ function deleteQuestion(eventId, questionId) {
 }
 
 
+async function getQuestionRefByOrder(eventId, order) {
 
-module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData, retrieveSingleQuestion, retrieveEventJSON, addNewEvent, updateExistingEvent, addNewQuestion, updateExistingQuestion, deleteEvent, deleteQuestion};
+  return new Promise((resolve, reject) => {
+    console.log('getting question [event: ' + eventId + ', order: ' + order + ']');
+    db.collection('events').doc(eventId).collection('questions').where('order', '==', order).get()
+      .then((querySnapshot) => {
+        if (querySnapshot.empty) {
+          resolve(null);
+          return console.log('error: no questions with order ' + order);
+        } else {
+          resolve(querySnapshot.docs[0].ref);
+          return('ref found');
+        }
+      })
+      .catch((error) => {
+        resolve(null);
+        return console.log(error);
+      })
+  });
+}
+
+
+
+
+
+module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData,
+                  retrieveSingleQuestion, retrieveEventJSON, addNewEvent, updateExistingEvent,
+                  addNewQuestion, updateExistingQuestion, deleteEvent, deleteQuestion,
+                  getQuestionRefByOrder};

@@ -25,4 +25,44 @@ block content
           td(style='min-width: 25px; text-align: center;')= question.data()['order']
           td(class='clickable')
             a(id='entry', href='./#{id}/') #{question.id}
+          td(class='clickable', style='min-width: 20px')
+            form(method='POST', action='./#{id}/changeOrder/')
+              input(
+                type='hidden',
+                id='oldOrder',
+                name='oldOrder',
+                value=question.data()['order']
+              )
+              input(
+                type='hidden',
+                id='newOrder',
+                name='newOrder',
+                value=question.data()['order']-1
+              )
+              input(
+                type='image',
+                src='https://feedback-app-ago.firebaseapp.com/images/arrow_up.jpeg',
+                style='padding: 0; margin: 0; border: 0; width: 20px',
+                alt='Le'
+              )
+          td(style='min-width: 20px')
+            form(method='POST', action='./#{id}/changeOrder/')
+              input(
+                type='hidden',
+                id='oldOrder',
+                name='oldOrder',
+                value=question.data()['order']
+              )
+              input(
+                type='hidden',
+                id='newOrder',
+                name='newOrder',
+                value=question.data()['order']+1
+              )
+              input(
+                type='image',
+                src='https://feedback-app-ago.firebaseapp.com/images/arrow_down.jpeg',
+                style='padding: 0; margin: 0; border: 0; width: 20px;',
+                alt='Le'
+              )
 

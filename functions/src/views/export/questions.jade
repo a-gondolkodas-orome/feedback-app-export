@@ -18,5 +18,6 @@ block content
     tbody
       each question, id in questions
         tr
+          td(style='min-width: 25px; text-align: center;')= question.data()['order']
           td(class='clickable')
             a(id='entry', href='./#{id}') #{id}

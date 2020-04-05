@@ -94,6 +94,13 @@ router.post('/:eventId/:questionId/deleteQuestion', async (req, res, next) => {
   return res.redirect('../..');
 })
 
+// POST question change order form
+router.post('/:eventId/:questionId/moveDown', async (req, res, next) => {
+  // ASD... TODO
+
+  return ;
+})
+
 // GET question update form.
 router.get('/:eventId/:questionId', async (req, res, next) => {
     question = await data.retrieveSingleQuestion(req.params['eventId'], req.params['questionId']);

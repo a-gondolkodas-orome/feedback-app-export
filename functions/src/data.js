@@ -1,13 +1,5 @@
 var firebase = require("firebase");
-
-// Initialize Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyDmshJPEN5RyoQB5HI9f6vf4Ys7dn8Gkkw",
-  projectId: "feedback-app-ago",
-  authDomain: "feedback-app-ago.firebaseapp.com",
-  databaseURL: "https://feedback-app-ago.firebaseio.com",
-  storageBucket: "feedback-app-ago.appspot.com"
-};
+var firebaseConfig = require("./firebase");
 
 firebase.initializeApp(firebaseConfig);
 

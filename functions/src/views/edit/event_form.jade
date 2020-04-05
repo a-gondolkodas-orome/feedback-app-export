@@ -18,16 +18,16 @@ block content
       input(type='text', name='code', placeholder='1234', value= (undefined === data['code']) ? '' : data['code'])
     div.form-group
       label(for='name') Név:
-      input(type='text', name='name', placeholder='nev', value= (undefined === data['name']) ? '' : data['name'])
+      input(type='text', name='name', placeholder='Név', value= (undefined === data['name']) ? '' : data['name'])
     div.form-group
       label(for='freq') Frekvencia
       input(type='number', name='freq', placeholder='0', value= (undefined === data['frequency']) ? '' : data['frequency'])
     div.form-group
       label(for='from') Mettől
-      input(type='datetime-local', name='from', value= (undefined === data['from']) ? new Date().toLocaleString() : data['from'].toDate().toLocaleString())
+      input(type='datetime-local', name='from', value= (undefined === data['from']) ? new Date().toString() : data['from'].toDate().toString())
     div.form-group
       label(for='until') Meddig
-      input(type='datetime-local', name='until', value= (undefined === data['until']) ? new Date().toLocaleString() : data['until'].toDate().toLocaleString())
+      input(type='datetime-local', name='until', value= (undefined === data['until']) ? new Date().toString() : data['until'].toDate().toString())
 
 
     button.btn.btn-primary(type='submit', id='navigate')= (mode === "create") ? "Hozzáad" : "Módosít"

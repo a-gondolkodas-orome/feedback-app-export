@@ -202,8 +202,8 @@ async function addNewEvent(event) {
     code: event['code'],
     name: event['name'],
     frequency: parseInt(event['freq']),
-    from: new Date(Date.parse(event['from'])),
-    until: new Date(Date.parse(event['until']))
+    from: new Date(event['from']),
+    until: new Date(event['until'])
   })
   .then(() => {
     return console.log('new event added:', event['id']);

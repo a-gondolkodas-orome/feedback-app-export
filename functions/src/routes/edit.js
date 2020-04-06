@@ -1,5 +1,6 @@
 var data = require('../data');
 var { body,validationResult,sanitizeBody } = require('express-validator');
+var moment = require('moment-timezone');
 var express = require('express');
 var router = express.Router();
 
@@ -20,7 +21,9 @@ router.get('/:eventId/editEvent', async (req, res, next) => {
     return res.render('edit/event_form', {
       eventId: req.params['eventId'],
       data: event,
-      mode: 'update'
+      mode: 'update',
+      from: moment(event['from' ].toDate()).tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm'),
+      until:moment(event['until'].toDate()).tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm')
     });
   } else {
     // Not found
@@ -39,7 +42,9 @@ router.post('/:eventId/editEvent', async (req, res, next) => {
 router.get('/createEvent', (req, res, next) => {
   return res.render('edit/event_form', {
     mode: 'create',
-    data: {}
+    data: {},
+    from: moment().tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm'),
+    until:moment().tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm')
   });
 })
 

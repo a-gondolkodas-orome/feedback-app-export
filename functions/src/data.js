@@ -1,6 +1,6 @@
-var firebase = require("firebase");
-var serviceAccount = require('./service-account-key.json');
 var admin = require('firebase-admin');
+var serviceAccount = require('./service-account-key.json');
+var moment = require('moment-timezone')
 
 var firebase_app = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -129,7 +129,7 @@ async function retrieveAnswerRefs(eventId, questionId) {
     db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
       .then((questionDoc) => {
         if (questionDoc.exists) {
-          db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').get()
+          db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').orderBy('timestamp').get()
             .then((answersSnapshot) => {
               if (!answers.hasOwnProperty(eventId))
                 answers[eventId] = {}
@@ -198,12 +198,13 @@ async function retrieveSingleQuestion(eventId, questionId) {
 
 
 async function addNewEvent(event) {
+  console.log('from: ' + moment.tz(event['from' ], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest').format());
   return db.collection('events').doc(event['id']).set({
     code: event['code'],
     name: event['name'],
     frequency: parseInt(event['freq']),
-    from: new Date(event['from']),
-    until: new Date(event['until'])
+    from:  moment.tz(event['from' ], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest'),
+    until: moment.tz(event['until'], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest')
   })
   .then(() => {
     return console.log('new event added:', event['id']);
@@ -218,8 +219,8 @@ async function updateExistingEvent(eventId, event) {
     code: event['code'],
     name: event['name'],
     frequency: parseInt(event['freq']),
-    from: new Date(Date.parse(event['from'])),
-    until: new Date(Date.parse(event['until']))
+    from:  moment.tz(event['from' ], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest'),
+    until: moment.tz(event['until'], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest')
   })
   .then(() => {
     return console.log('existing event updated:', eventId);

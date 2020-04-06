@@ -26,7 +26,8 @@ function retrieveQuestionJSON(eventId, questionId) {
             answers['answers'].push({
               answer: answerDoc.data()['answer'],
               name:   answerDoc.data()['name'],
-              timestamp: answerDoc.data()['timestamp'].toDate().toLocaleString()
+              timestamp: moment(answerDoc.data()['timestamp'].toDate())
+                            .tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm')
             });
           });
           resolve(answers);
@@ -137,6 +138,9 @@ async function retrieveAnswerRefs(eventId, questionId) {
                 answers[eventId][questionId] = {}
               answersSnapshot.forEach((answerDoc) => {
                 answers[eventId][questionId][answerDoc.id] = answerDoc.data();
+                answers[eventId][questionId][answerDoc.id]['timestamp'] =
+                  moment(answers[eventId][questionId][answerDoc.id]['timestamp'].toDate())
+                    .tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm');
               });
               resolve(answers[eventId][questionId]);
               return console.log('answers retrieved');

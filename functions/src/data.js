@@ -254,7 +254,10 @@ async function addNewQuestion(eventId, question) {
       type:  question['type'],
   };
   if (question['type'] === 'wordcloud') {
-    data['words'] = question['words'].split(', ');
+    data['words'] = [];
+    for (var i = 0; i < question['numWords']; i++) {
+      data['words'].push(data['word_'+i]);
+    }
   }
   let doc = db.collection('events').doc(eventId).collection('questions').doc(question['id']);
   return doc.set(data)
@@ -272,7 +275,10 @@ async function updateExistingQuestion(eventId, questionId, question) {
     type:  question['type'],
   }
   if (question['type'] === 'wordcloud') {
-    data['words'] = question['words'].split(', ');
+    data['words'] = [];
+    for (var i = 0; i < question['numWords']; i++) {
+      data['words'].push(question['word_'+i]);
+    }
   }
   return db.collection('events').doc(eventId).collection('questions').doc(questionId).update(data)
   .then(() => {

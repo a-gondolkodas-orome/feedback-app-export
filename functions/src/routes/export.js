@@ -3,8 +3,6 @@ var parser = require('json2csv');
 var express = require('express');
 var router = express.Router();
 
-// TODO: JSON to CSV
-
 // GET events listing.
 router.get('/', async (req, res, next) => {
   console.log('rq url was', req.originalUrl);
@@ -34,7 +32,7 @@ router.get('/:eventId/csvExport', async (req, res, next) => {
   if (eventJSON === null) {
     return res.status(404).send('No event found.');
   }
-  const fields = ['questionId', 'questionText', 'answers.answer', 'answers.name', 'answers.timestamp'];
+  const fields = ['questionId', 'questionText', 'answers.answer', 'answers.name', 'answers.year', 'answers.city', 'answers.school', 'answers.timestamp'];
   let csv = parser.parse(eventJSON, { fields, unwind: 'answers' });
   res.attachment(req.params['eventId'] + '.csv');
   return res.send(csv);

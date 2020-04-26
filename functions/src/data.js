@@ -203,7 +203,10 @@ async function addNewEvent(event) {
     name: event['name'],
     frequency: parseInt(event['freq']),
     from:  moment.tz(event['from' ], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest'),
-    until: moment.tz(event['until'], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest')
+    until: moment.tz(event['until'], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest'),
+    duration: event['duration'],
+    morning:  event['morning'],
+    evening:  event['evening']
   })
   .then(() => {
     return console.log('new event added:', event['id']);
@@ -219,7 +222,10 @@ async function updateExistingEvent(eventId, event) {
     name: event['name'],
     frequency: parseInt(event['freq']),
     from:  moment.tz(event['from' ], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest'),
-    until: moment.tz(event['until'], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest')
+    until: moment.tz(event['until'], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest'),
+    duration: event['duration'],
+    morning:  event['morning'],
+    evening:  event['evening']
   })
   .then(() => {
     return console.log('existing event updated:', eventId);

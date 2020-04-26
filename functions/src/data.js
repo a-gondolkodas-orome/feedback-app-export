@@ -210,12 +210,12 @@ function updateExistingQuestion(eventId, questionId, question) {
 
 
 function deleteEvent(eventId) {
-  // NOTE: data is still accessible in console but doesn't show up in queries, although I couldn't find in console...
+  // NOTE: data is still accessible in console if it had subcollection, only it doesn't show up in queries
   return db.collection('events').doc(eventId).delete();
 }
 
 function deleteQuestion(eventId, questionId) {
-  // NOTE: data is still accessible in console but doesn't show up in queries, although I couldn't find in console...
+  // NOTE: data is still accessible in console if it had subcollection, only it doesn't show up in queries
   return db.collection('events').doc(eventId).collection('questions').doc(questionId).delete();
 }
 

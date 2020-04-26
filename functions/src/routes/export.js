@@ -4,8 +4,8 @@ var express = require('express');
 var router = express.Router();
 
 // GET events listing.
-router.get('/', async (req, res, next) => {
-  await data.retrieveEventRefs()
+router.get('/', async (req, res, next) => await
+  data.retrieveEventRefs()
     .then((events) => res.render('export/events', {
       events: events
     }))
@@ -13,11 +13,11 @@ router.get('/', async (req, res, next) => {
       console.log(error);
       res.status(404).send("Sajnos nem sikerült elérni az eseményeket, próbáld újra később.");
     })
-});
+);
 
 // GET questions listing.
-router.get('/:eventId', async (req, res, next) => {
-  await data.retrieveQuestionRefs(req.params['eventId'])
+router.get('/:eventId', async (req, res, next) => await
+  data.retrieveQuestionRefs(req.params['eventId'])
     .then((questions) => res.render('export/questions', {
       eventId: req.params['eventId'],
       questions: questions
@@ -26,11 +26,11 @@ router.get('/:eventId', async (req, res, next) => {
       console.log(error);
       res.status(404).send("Nincs ilyen esemény.");
     })
-});
+);
 
 // GET event CSV export
-router.get('/:eventId/csvExport', async (req, res, next) => {
-  await data.retrieveEventJSON(req.params['eventId'])
+router.get('/:eventId/csvExport', async (req, res, next) => await
+  data.retrieveEventJSON(req.params['eventId'])
     .then((eventJSON) => {
       const fields = [
         'questionId',
@@ -53,11 +53,11 @@ router.get('/:eventId/csvExport', async (req, res, next) => {
       console.log(error);
       res.status(404).send("Nincs ilyen esemény.");
     })
-})
+)
 
 // GET answers listing.
-router.get('/:eventId/:questionId', async (req, res, next) => {
-  await data.retrieveAnswerRefs(req.params['eventId'], req.params['questionId'])
+router.get('/:eventId/:questionId', async (req, res, next) => await
+  data.retrieveAnswerRefs(req.params['eventId'], req.params['questionId'])
   .then((data) => res.render('export/answers', {
       eventId: req.params['eventId'],
       questionId: req.params['questionId'], // redundant ATM
@@ -68,6 +68,6 @@ router.get('/:eventId/:questionId', async (req, res, next) => {
     console.log(error);
     res.status(404).send("Nincs ilyen kérdés.");
   })
-});
+);
 
 module.exports = router;

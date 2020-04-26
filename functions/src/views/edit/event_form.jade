@@ -10,28 +10,64 @@ block content
   form(method='POST' action='.')
     if (mode === "create")
       div.form-group
-      label(for='id') Id:
-      input(type='text', name='id')
+        label(for='id') Id:
+        input(type='text', name='id')
 
     div.form-group
       label(for='code') Kód:
-      input(type='text', name='code', placeholder='1234', value= (undefined === data['code']) ? '' : data['code'])
+      p(class='description') 3-5 számjegyű azonosító. Jelenleg a "0000" azonosítójú eseményhez csatlakoznak a felhasználók, tehát új alapértelmezett esemény beállításához a régi kódját meg kell változtatni és az újnak "0000"-t beállítani.
+      input(
+        type='text',
+        name='code',
+        placeholder='1234',
+        value= (undefined === data['code']) ? '' : data['code']
+      )
     div.form-group
       label(for='name') Név:
-      input(type='text', name='name', placeholder='Név', value= (undefined === data['name']) ? '' : data['name'])
+      input(
+        type='text',
+        name='name',
+        placeholder='Név',
+        value= (undefined === data['name']) ? '' : data['name']
+      )
     div.form-group
       label(for='freq') Frekvencia
-      input(type='number', name='freq', placeholder='0', value= (undefined === data['frequency']) ? '' : data['frequency'])
+      p(class='description') Kérdések gyakorisága, percekben.
+      input(
+        type='number',
+        name='freq',
+        placeholder='0',
+        value= (undefined === data['frequency']) ? '' : data['frequency']
+      )
     div.form-group
       label(for='from') Mettől
+      p(class='description') Esemény kezdete magyar idő szerint.
       input(type='datetime-local', name='from', value= from)
     div.form-group
       label(for='until') Meddig
+      p(class='description') Esemény vége magyar idő szerint.
       input(type='datetime-local', name='until', value= until)
+    div.form-group
+      label(for='duration') Időtartam
+      p(class='description') Regisztráció után legfeljebb hány óráig kapjon kérdéseket a felhasználó? A kérdések a regisztráció időpontja után ennyivel szűnnek meg, de legkésőbb a Meddig mező értékéig.
+      input(type='number', name='duration', value= undefined === data['duration'] ? 168 : data['duration'])
+    div.form-group
+      label(for='morning') Reggel
+      p(class='description') Reggel hány órától kezdjen kérdéseket kapni a felhasználó? (0-23)
+      input(type='number', name='morning', value= undefined === data['morning'] ? 9 : data['morning'])
+    div.form-group
+      label(for='evening') Este
+      p(class='description') Este hány óráig kapjon kérdéseket a felhasználó? (0-23)
+      input(type='number', name='evening', value= undefined === data['evening'] ? 16 : data['evening'])
 
 
     button.btn.btn-primary(type='submit', id='navigate')= (mode === "create") ? "Hozzáad" : "Módosít"
 
   if (mode !== "create")
     form(method='POST' action='../deleteEvent/')
-      button.btn.btn-danger.del(type='submit', id='navigate', onclick="return confirm('Biztosan törölni akarod az eseményt? Minden adat el fog veszni!');", style='background-color: red')= 'Törlés'
+      button.btn.btn-danger.del(
+        type='submit',
+        id='navigate',
+        onclick="return confirm('Biztosan törölni akarod az eseményt? Minden adat el fog veszni!');",
+        style='background-color: red'
+      ) Töröl

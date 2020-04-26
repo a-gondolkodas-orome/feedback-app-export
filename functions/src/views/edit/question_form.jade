@@ -35,40 +35,71 @@ block content
   form(method='POST' action='.')
     if (mode === "create")
       div.form-group
-      label(for='id') Id:
-      input(type='text', name='id')
+        label(for='id') Id:
+        p(class='description') Rövid egyszavas azonosító.
+        input(type='text', name='id')
 
     div.form-group
       label(for='text') Text:
-      input(type='text', name='text', value= (undefined === data['text']) ? '' : data['text'])
+      p(class='description') A kérdés szövege.
+      input(type='text', name='text', value= undefined === data['text'] ? '' : data['text'])
     div.form-group
       label(for='type') Type:
-      select(type='select', name='type', id='type',
+      p(class='description') "scale3": gombok 1-től 3-ig
+      p(class='description') "scale5": gombok 1-től 5-ig
+      p(class='description') "scale10": gombok 1-től 10-ig
+      p(class='description') "wordcloud": megadható szavak közül választás
+      p(class='description') "textbox": szabad szöveges válasz
+            
+      select(
+        type='select',
+        name='type',
+        id='type',
         data-selected= (undefined === data['type']) ? 'textbox' : data['type'],
-          onchange='checkWordBox()')
+        onchange='checkWordBox()'
+      )
         option(value='scale3',    selected= (data['type']==='scale3')) scale3
         option(value='scale5',    selected= (data['type']==='scale5')) scale5
         option(value='scale10',   selected= (data['type']==='scale10')) scale10
         option(value='wordcloud', selected= (data['type']==='wordcloud')) wordcloud
         option(value='textbox',   selected= (data['type']==='textbox')) textbox
 
-    div.form-group(id='words_group',
-        style=(data['type']==='wordcloud') ? 'display: initial;' : 'display: none;')
+    div.form-group(
+      id='words_group',
+      style= (data['type'] == 'wordcloud') ? 'display: initial;' : 'display: none;'
+      )
       label(for='words') Words:
-      input(type='hidden', id='numWords', name='numWords',
-          value= (undefined === data['words']) ? 0 : data['words'].length)
+      input(
+        type='hidden',
+        id='numWords',
+        name='numWords',
+        value= (undefined === data['words']) ? 0 : data['words'].length
+      )
       div(id='words_list')
         if (undefined !== data['words'])
           each word, id in data['words']
-            input(type='text', name='word_'+id, multiple=true, value= word)
+            input(
+              type='text',
+              name='word_'+id,
+              multiple=true,
+              value= word
+            )
       button(type='button', onclick='newWordBox()') Új szó
       button(type='button', onclick='deleteLastBox()') Utolsó szó törlése
       br
       br
 
-    button.btn.btn-primary(type='submit', id='navigate')= (mode === "create") ? "Hozzáad" : "Módosít"
+    button.btn.btn-primary(
+      type='submit',
+      id='navigate'
+    )= (mode === "create") ? "Hozzáad" : "Módosít"
 
   if (mode !== "create")
     form(method='POST' action='./deleteQuestion/')
-      button.btn.btn-danger.del(type='submit', id='navigate',
-        onclick="return confirm('Biztosan törölni akarod a kérdést? Minden adat el fog veszni!');", style='background-color: red')= 'Törlés'
+      button.btn.btn-danger.del(
+        type='submit',
+        id='navigate',
+        onclick="return confirm('Biztosan törölni akarod a kérdést? Minden adat el fog veszni!');",
+        style='background-color: red'
+      ) Törlés
+

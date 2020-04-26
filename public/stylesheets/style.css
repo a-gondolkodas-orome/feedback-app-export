@@ -68,3 +68,7 @@ input, select {
     font-size: 16px;
     resize: none;
 }
+.description {
+    margin: 0px;
+    padding: 5px;
+}

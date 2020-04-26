@@ -8,197 +8,121 @@ var firebase_app = admin.initializeApp({
 });
 
 // Get a database reference to our posts
-var db = admin.firestore(firebase_app);
+const db = admin.firestore(firebase_app);
 
-// TODO: refactor nested promises
+// EXPORT functions
 
-function retrieveQuestionJSON(eventId, questionId, userInfos) {
-  return new Promise(resolve  => {
-    retrieveSingleQuestion(eventId, questionId).then((questionData) => {
-      let answers = {
-        questionId: questionId,
-        questionText: questionData['text'],
-        answers: []
-      };
-      return db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').get()
-        .then((_answers) => {
-          _answers.forEach((answerDoc) => {
-            let name = answerDoc.data().name
-            let userInfo = userInfos[name] === undefined ? {
-                                                      year: undefined,
-                                                      city: "",
-                                                      school: ""
-                                                    } : userInfos[name]
-            answers['answers'].push({
-              answer: answerDoc.data()['answer'],
-              name:   answerDoc.data()['name'],
-              year:   userInfo.year,
-              city:   userInfo.city,
-              school: userInfo.school,
-              timestamp: moment(answerDoc.data()['timestamp'].toDate())
-                            .tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm')
-            });
-          });
-          resolve(answers);
-          return console.log(eventId+'.'+questionId, 'JSON retrieved');
-        })
-        .catch((error) => {
-          console.log(error);
-          resolve(null);
-        });
-    }).catch((error) => {
-      console.log(error);
-      resolve(null);
-    });
-  });
+function retrieveEventRefs() {
+  console.log('retrieving events');
+  return db.collection('events').get()
+    .then((eventsSnapshot) => {
+      let events = {};
+      eventsSnapshot.forEach((eventDoc) => (events[eventDoc.id] = eventDoc));
+      return events;
+    })
+}
+
+function retrieveQuestionRefs(eventId) {
+  console.log('retrieving questions of ' + eventId);
+  return db.collection('events').doc(eventId).get()
+    .then((eventSnapshot) => {
+      if (!eventSnapshot.exists)
+        throw new Error("Event " + eventId + " doesn't exist");
+      return db.collection('events').doc(eventId).collection('questions').orderBy('order').get();
+    })
+    .then((questionsSnapshot) => {
+      let questions = {};
+      questionsSnapshot.forEach((questionDoc) => (questions[questionDoc.id] = questionDoc));
+      return questions;
+    })
+}
+
+function retrieveAnswerRefs(eventId, questionId) {
+  console.log('retrieving answers: ' + eventId + '.' + questionId);
+  let data = {
+    questionData: {},
+    answers: {}
+  };
+  return db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
+    .then((questionDoc) => {
+      if (!questionDoc.exists)
+        throw new Error("Question " + eventId + "." + questionId + " doesn't exist");
+      data.questionData = questionDoc.data();
+      return db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').orderBy('timestamp').get();
+    })
+    .then((answersSnapshot) => answersSnapshot.forEach((answerDoc) => {
+        data.answers[answerDoc.id] = answerDoc.data();
+        data.answers[answerDoc.id]['timestamp'] =
+          moment(data.answers[answerDoc.id]['timestamp'].toDate())
+            .tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm');
+    }))
+    .then(() => data)
 }
 
 
 // Retrieve data in JSON from firebase
+
 function retrieveEventJSON(eventId) {
-  console.log('retrieving JSON data for', eventId);
-  return getUserInfos()
-    .then((userInfos) =>
-      db.collection('events').doc(eventId).collection('questions').get()
-        .then((_questions) => {
-          let questionJSONPromises = []
-          _questions.forEach((questionDoc) => {
-            questionJSONPromises.push(
-              retrieveQuestionJSON(eventId, questionDoc.id, userInfos)
-            )
-          })
-          return questionJSONPromises
-        })
-    )
+  console.log('retrieving JSON data of', eventId);
+  return Promise.all([
+    db.collection('events').doc(eventId).collection('questions').get(),
+    getUserInfos()
+  ]).then(([questions, userInfos]) => {
+      let questionJSONPromises = [];
+      questions.forEach((questionDoc) =>
+        questionJSONPromises.push(retrieveQuestionJSON(eventId, questionDoc.id, userInfos))
+      );
+      return questionJSONPromises;
+    })
     .then((promises) => Promise.all(promises))
 }
 
-
-async function retrieveEventRefs() {
-  return new Promise(resolve => {
-    events = {};
-    console.log('retrieving events');
-    db.collection('events').get()
-      .then((eventsSnapshot) => {
-        eventsSnapshot.forEach((eventDoc) => (events[eventDoc.id] = eventDoc));
-        resolve(events);
-        return console.log('events retrieved');
+function retrieveQuestionJSON(eventId, questionId, userInfos) {
+  let answers = {
+    questionId: questionId,
+    answers: []
+  };
+  return retrieveSingleQuestion(eventId, questionId)
+    .then((questionData) => answers.questionText = questionData['text'])
+    .then(() => db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').get())
+    .then((answersSnapshot) => answersSnapshot.forEach((answerDoc) => {
+        let name = answerDoc.data().name;
+        let userInfo = userInfos[name] === undefined ? {
+                                                  year: undefined,
+                                                  city: "",
+                                                  school: ""
+                                                } : userInfos[name];
+        answers['answers'].push({
+          answer: answerDoc.data()['answer'],
+          name:   answerDoc.data()['name'],
+          year:   userInfo.year,
+          city:   userInfo.city,
+          school: userInfo.school,
+          timestamp: moment(answerDoc.data()['timestamp'].toDate())
+                        .tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm')
+        });
       })
-      .catch((error) => (console.log(error)));
-  });
-}
-
-async function retrieveQuestionRefs(eventId) {
-  return new Promise(resolve => {
-    questions = {};
-    console.log('retrieving questions: ' + eventId);
-    db.collection('events').doc(eventId).get()
-      .then((eventDoc) => {
-        if (eventDoc.exists) {
-          db.collection('events').doc(eventId).collection('questions').orderBy('order').get()
-            .then((questionsSnapshot) => {
-              questionsSnapshot.forEach((questionDoc) => (questions[questionDoc.id] = questionDoc));
-              resolve(questions);
-              return console.log('questions retrieved');
-            })
-            .catch((error) => {
-              console.log(error);
-              resolve(null);
-            });
-        } else {
-          console.log('event ' + eventId + ' does not exists');
-          resolve(null);
-        }
-        return;
-      })
-      .catch((error) => {
-        console.log(error);
-        resolve(null);
-      });
-  });
-}
-
-async function retrieveAnswerRefs(eventId, questionId) {
-  return new Promise(resolve => {
-    console.log('retrieving answers: ' + eventId + '.' + questionId);
-    answers = {}
-    db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
-      .then((questionDoc) => {
-        if (questionDoc.exists) {
-          db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').orderBy('timestamp').get()
-            .then((answersSnapshot) => {
-              if (!answers.hasOwnProperty(eventId))
-                answers[eventId] = {}
-              if (!answers[eventId].hasOwnProperty(questionId))
-                answers[eventId][questionId] = {}
-              answersSnapshot.forEach((answerDoc) => {
-                answers[eventId][questionId][answerDoc.id] = answerDoc.data();
-                answers[eventId][questionId][answerDoc.id]['timestamp'] =
-                  moment(answers[eventId][questionId][answerDoc.id]['timestamp'].toDate())
-                    .tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm');
-              });
-              resolve(answers[eventId][questionId]);
-              return console.log('answers retrieved');
-            })
-            .catch((error) => {
-              console.log(error);
-              resolve(null);
-            });
-        } else {
-          console.log('question ' + eventId + '.' + questionId + ' does not exists');
-          resolve(null);
-        }
-        return;
-      })
-      .catch((error) => {
-        console.log(error);
-        resolve(null);
-      });
-  });
-}
-
-async function retrieveEventData(eventId) {
-  return new Promise(resolve => {
-    console.log('retrieving data for event ' + eventId);
-    db.collection('events').doc(eventId).get()
-      .then((eventDoc) => {
-        if (eventDoc.exists) {
-          resolve(eventDoc.data());
-          return console.log('event data retrieved:', eventId);
-        } else {
-          resolve(null);
-          return console.log('event data could not be retrieved', eventId);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        resolve(null);
-      })
-  })
-}
-
-async function retrieveSingleQuestion(eventId, questionId) {
-  return new Promise(resolve => {
-    console.log('retrieving question data: ' + eventId + '.' + questionId);
-    db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
-      .then((questionDoc) => {
-        if (questionDoc.exists) {
-          resolve(questionDoc.data());
-        } else {
-          resolve(null);
-        }
-        return;
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-  })
+    )
+    .then(() => answers)
 }
 
 
-async function addNewEvent(event) {
-  console.log('from: ' + moment.tz(event['from' ], 'YYYY. MM. DD. HH:mm', 'Europe/Budapest').format());
-  return db.collection('events').doc(event['id']).set({
+// EDIT functions
+
+//   EDIT EVENT functions
+
+function retrieveEventData(eventId) {
+  console.log('retrieving data for event ' + eventId);
+  return db.collection('events').doc(eventId).get()
+    .then((eventDoc) => {
+      if (!eventDoc.exists)
+        throw new Error("Event " + eventId + " doesn't exist.");
+      return eventDoc.data();
+    })
+}
+
+function addNewEvent(event) {
+  db.collection('events').doc(event['id']).set({
     code: event['code'],
     name: event['name'],
     frequency: parseInt(event['freq']),
@@ -209,14 +133,12 @@ async function addNewEvent(event) {
     evening:  event['evening']
   })
   .then(() => {
-    return console.log('new event added:', event['id']);
+    return console.log('New event added:', event['id']);
   })
-  .catch((error) => {
-    console.log(error);
-  });
+  .catch(console.log)
 }
 
-async function updateExistingEvent(eventId, event) {
+function updateExistingEvent(eventId, event) {
   db.collection('events').doc(eventId).update({
     code: event['code'],
     name: event['name'],
@@ -228,7 +150,7 @@ async function updateExistingEvent(eventId, event) {
     evening:  event['evening']
   })
   .then(() => {
-    return console.log('existing event updated:', eventId);
+    return console.log('Existing event updated:', eventId);
   })
   .catch((error) => {
     console.log(error);
@@ -236,41 +158,41 @@ async function updateExistingEvent(eventId, event) {
 }
 
 
-async function addNewQuestion(eventId, question) {
-  var order = await db.collection('events').doc(eventId).collection('questions').orderBy('order', 'desc').get()
-    .then((querySnapshot) => {
-      if (querySnapshot.empty) {
-        return 0;
-      } else {
-        return querySnapshot.docs[0].data()['order'] + 1;
-      }
+// EDIT QUESTION functions
+
+function retrieveSingleQuestion(eventId, questionId) {
+  console.log('retrieving question data: ' + eventId + '.' + questionId);
+  return db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
+    .then((questionDoc) => {
+      if (!questionDoc.exists)
+        throw new Error("Question " + eventId + "." + questionId + " doesn't exist.");
+      return questionDoc.data();
     })
-    .catch((error) => {
-      console.log(error);
-      return 0;
-    });
-  let data = {
+}
+
+
+function addNewQuestion(eventId, question) {
+  return db.collection('events').doc(eventId).collection('questions').orderBy('order', 'desc').get()
+    .then((querySnapshot) => (querySnapshot.empty ? 0 : 1 + querySnapshot.docs[0].data().order))
+    .then((order) => ({
       order: order,
       text:  question['text'],
       type:  question['type'],
-  };
-  if (question['type'] === 'wordcloud') {
-    data['words'] = [];
-    for (var i = 0; i < question['numWords']; i++) {
-      data['words'].push(data['word_'+i]);
-    }
-  }
-  let doc = db.collection('events').doc(eventId).collection('questions').doc(question['id']);
-  return doc.set(data)
-  .then(() => {
-    return console.log('new question added:', question['id']);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+    }))
+    .then((data) => {
+      if (question['type'] === 'wordcloud') {
+        data['words'] = [];
+        for (var i = 0; i < question['numWords']; i++)
+          data['words'].push(data['word_'+i]);
+      }
+      return data;
+    })
+    .then(db.collection('events').doc(eventId).collection('questions').doc(question['id']).set)
+    .then(() => console.log('New question added:', question['id']))
+    .catch(console.log);
 }
 
-async function updateExistingQuestion(eventId, questionId, question) {
+function updateExistingQuestion(eventId, questionId, question) {
   let data = {
     text:  question['text'],
     type:  question['type'],
@@ -282,16 +204,12 @@ async function updateExistingQuestion(eventId, questionId, question) {
     }
   }
   return db.collection('events').doc(eventId).collection('questions').doc(questionId).update(data)
-  .then(() => {
-    return console.log('existing question updated', eventId+'.'+questionId);
-  })
-  .catch((error) => {
-    console.log(error);
-  })
+    .then(() => console.log('Existing question updated: ' + eventId + '.' + questionId))
+    .catch(console.log)
 }
 
 
-async function deleteEvent(eventId) {
+function deleteEvent(eventId) {
   // NOTE: data is still accessible in console but doesn't show up in queries, although I couldn't find in console...
   return db.collection('events').doc(eventId).delete();
 }
@@ -302,31 +220,16 @@ function deleteQuestion(eventId, questionId) {
 }
 
 
-async function getQuestionRefByOrder(eventId, order) {
-
-  return new Promise((resolve, reject) => {
-    console.log('getting question [event: ' + eventId + ', order: ' + order + ']');
-    db.collection('events').doc(eventId).collection('questions').where('order', '==', order).get()
-      .then((querySnapshot) => {
-        if (querySnapshot.empty) {
-          resolve(null);
-          return console.log('error: no questions with order ' + order);
-        } else {
-          resolve(querySnapshot.docs[0].ref);
-          return('ref found');
-        }
-      })
-      .catch((error) => {
-        resolve(null);
-        return console.log(error);
-      })
-  });
+function getQuestionRefByOrder(eventId, order) {
+  console.log('getting question: ' + eventId + '#' + order);
+  return db.collection('events').doc(eventId).collection('questions').where('order', '==', order).get()
+    .then((querySnapshot) => {
+      if (querySnapshot.empty)
+        throw new Error("Question with order " + order + " doesn't exist");
+      return querySnapshot.docs[0].ref;
+    })
 }
 
-function getUserInfoByName(name) {
-  return db.collection('users').doc(name).get()
-    .then((userDoc) => userDoc.data())
-}
 
 function getUserInfos() {
   return db.collection('users').get()
@@ -339,8 +242,9 @@ function getUserInfos() {
 
 
 
-
-module.exports = {retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventData,
-                  retrieveSingleQuestion, retrieveEventJSON, addNewEvent, updateExistingEvent,
-                  addNewQuestion, updateExistingQuestion, deleteEvent, deleteQuestion,
-                  getQuestionRefByOrder, getUserInfos};
+module.exports = {
+  retrieveEventRefs, retrieveQuestionRefs, retrieveAnswerRefs, retrieveEventJSON,
+  retrieveEventData, retrieveSingleQuestion, getQuestionRefByOrder,
+  addNewEvent, updateExistingEvent, deleteEvent,
+  addNewQuestion, updateExistingQuestion, deleteQuestion,
+};

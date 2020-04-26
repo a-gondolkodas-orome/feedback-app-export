@@ -6,61 +6,67 @@ var router = express.Router();
 
 // TODO: validation and sanitazitaion with express-validator
 
+
+// EVENT functions
+
 // GET events listing.
-router.get('/', async (req, res, next) => {
-  events = await data.retrieveEventRefs();
-  return res.render('edit/events', {
-    events: events
-  });
+router.get('/', async (req, res, next) => await
+  data.retrieveEventRefs()
+    .then((events) => res.render('edit/events', {
+      events: events
+    }))
+    .catch((error) => {
+      console.log(error);
+      res.status(404).send("Sajnos nem sikerült elérni az eseményeket, próbáld újra később.");
+    })
+);
+
+
+// GET event create form
+router.get('/createEvent', (req, res, next) => res.render('edit/event_form', {
+    mode: 'create',
+    data: {},
+    from: moment().tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm'),
+    until:moment().tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm')
+}));
+
+// POST event create form
+router.post('/createEvent', async (req, res, next) => {
+  await data.addNewEvent(req.body);
+  return res.redirect('../');
 });
 
+
 // GET event update form
-router.get('/:eventId/editEvent', async (req, res, next) => {
-  event = await data.retrieveEventData(req.params['eventId']);
-  if (event !== null) {
-    return res.render('edit/event_form', {
+router.get('/:eventId/editEvent', async (req, res, next) => await
+  data.retrieveEventData(req.params['eventId'])
+    .then((event) => res.render('edit/event_form', {
       eventId: req.params['eventId'],
       data: event,
       mode: 'update',
       from: moment(event['from' ].toDate()).tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm'),
       until:moment(event['until'].toDate()).tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm')
-    });
-  } else {
-    // Not found
-    return next();
-  }
-});
+    }))
+    .catch((error) => {
+      console.log(error);
+      res.status(404).send("Nincs ilyen esemény.");
+    })
+);
 
 // POST event update form
 router.post('/:eventId/editEvent', async (req, res, next) => {
-  console.log('POSTed: ', req.body);
   await data.updateExistingEvent(req.params['eventId'], req.body);
   return res.redirect('../');
 })
 
-// GET event create form
-router.get('/createEvent', (req, res, next) => {
-  return res.render('edit/event_form', {
-    mode: 'create',
-    data: {},
-    from: moment().tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm'),
-    until:moment().tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm')
-  });
-})
-
 // POST event delete form
 router.post('/:eventId/deleteEvent', async (req, res, next) => {
-  console.log('event to delete:', req.params['eventId']);
   await data.deleteEvent(req.params['eventId']);
   return res.redirect('../..');
 })
 
-// POST event create form
-router.post('/createEvent', async (req, res, next) => {
-  console.log('event to create', req.body);
-  await data.addNewEvent(req.body);
-  return res.redirect('../');
-})
+
+// QUESTION functions
 
 // GET questions listing.
 router.get('/:eventId', async (req, res, next) => {
@@ -102,52 +108,45 @@ router.post('/:eventId/:questionId/deleteQuestion', async (req, res, next) => {
 // POST question change order form
 router.post('/:eventId/:questionId/changeOrder', async (req, res, next) => {
   
-  var oldOrder = parseInt(req.body['oldOrder']);
-  var newOrder = parseInt(req.body['newOrder']);
-  var questionRefs = await Promise.all([
+  let oldOrder = parseInt(req.body['oldOrder']);
+  let newOrder = parseInt(req.body['newOrder']);
+  await Promise.all([
     data.getQuestionRefByOrder(req.params['eventId'], oldOrder),
     data.getQuestionRefByOrder(req.params['eventId'], newOrder)
-  ]);
-
-  if (questionRefs[0] !== null && questionRefs[1] !== null) {
-    await Promise.all([
-      questionRefs[0].update({
+  ]).then(([oldQuestion, newQuestion]) => Promise.all([
+      oldQuestion.update({
         order: newOrder
       }),
-      questionRefs[1].update({
+      newQuestion.update({
         order: oldOrder
       })
-    ]).then(() => console.log('order changed successfully'))
-      .catch((error) => console.log(error));
-  } else {
-    console.log('no matching orders, invalid dataset');
-  }
+    ]))
+    .then(() => console.log('Order changed successfully'))
+    .catch(console.log)
 
   return res.redirect('../..');
 })
 
 // GET question update form.
-router.get('/:eventId/:questionId', async (req, res, next) => {
-    question = await data.retrieveSingleQuestion(req.params['eventId'], req.params['questionId']);
-    if (question !== null) {
-      return res.render('edit/question_form', {
-        eventId: req.params['eventId'],
-        questionId: req.params['questionId'],
-        data: question,
-        mode: 'update'
-      });
-    } else {
-       // Not found
-      return next();
-    }
-})
+router.get('/:eventId/:questionId', async (req, res, next) => await
+  data.retrieveSingleQuestion(req.params['eventId'], req.params['questionId'])
+    .then((question) => res.render('edit/question_form', {
+      eventId: req.params['eventId'],
+      questionId: req.params['questionId'],
+      data: question,
+      mode: 'update'
+    }))
+    .catch((error) => {
+      console.log(error);
+      res.status(404).send("Nincs ilyen kérdés.");
+    })
+);
 
 // POST question update form.
-router.post('/:eventId/:questionId', async (req, res, next) => {
-  console.log('POSTed ' + req.body['text'] + ' ' + req.body['type']);
-  await data.updateExistingQuestion(req.params['eventId'], req.params['questionId'], req.body);
+router.post('/:eventId/:questionId', (req, res, next) => {
+  data.updateExistingQuestion(req.params['eventId'], req.params['questionId'], req.body);
   return res.redirect('../');
-})
+});
 
 
 

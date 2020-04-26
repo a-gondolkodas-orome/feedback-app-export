@@ -3,30 +3,30 @@ extends ../layout
 block content
   a(id='navigate', href='..') Vissza
   
-  h1= "Kérdések módosítása"
+  h1 Kérdések módosítása
 
-  a(id='navigate', href='./createQuestion/')= "Új kérdés"
-  br
-  br
-
-  a(id='navigate', href='./editEvent/')= "Esemény módosítása"
+  a(id='navigate', href='./createQuestion/') Új kérdés
   br
   br
 
-  a(id='navigate', href='../../export/#{eventId}/')= "Ugrás az exportáláshoz"
+  a(id='navigate', href='./editEvent/') Esemény módosítása
+  br
+  br
+
+  a(id='navigate', href='../../export/' + eventId + '/') Ugrás az exportáláshoz
   br
   br
 
   table
     thead
     tbody
-      each question, id in questions
+      each question in questions
         tr
           td(style='min-width: 25px; text-align: center;')= question.data()['order']
           td(class='clickable')
-            a(id='entry', href='./#{id}/') #{question.id}
+            a(id='entry', href='./' + question.id + '/')= question.id
           td(class='clickable', style='min-width: 20px')
-            form(method='POST', action='./#{id}/changeOrder/')
+            form(method='POST', action='./' + question.id + '/changeOrder/')
               input(
                 type='hidden',
                 id='oldOrder',
@@ -46,7 +46,7 @@ block content
                 alt='Le'
               )
           td(style='min-width: 20px')
-            form(method='POST', action='./#{id}/changeOrder/')
+            form(method='POST', action='./' + question.id + '/changeOrder/')
               input(
                 type='hidden',
                 id='oldOrder',

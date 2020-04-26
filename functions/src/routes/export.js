@@ -5,54 +5,69 @@ var router = express.Router();
 
 // GET events listing.
 router.get('/', async (req, res, next) => {
-  console.log('rq url was', req.originalUrl);
-  events = await data.retrieveEventRefs();
-  return res.render('export/events', {
-    events: events
-  });
+  await data.retrieveEventRefs()
+    .then((events) => res.render('export/events', {
+      events: events
+    }))
+    .catch((error) => {
+      console.log(error);
+      res.status(404).send("Sajnos nem sikerült elérni az eseményeket, próbáld újra később.");
+    })
 });
 
 // GET questions listing.
 router.get('/:eventId', async (req, res, next) => {
-  questions = await data.retrieveQuestionRefs(req.params['eventId']);
-  if (questions !== null) {
-    return res.render('export/questions', {
+  await data.retrieveQuestionRefs(req.params['eventId'])
+    .then((questions) => res.render('export/questions', {
       eventId: req.params['eventId'],
       questions: questions
-    });
-  } else {
-    // Not found
-    return next();
-  }
+    }))
+    .catch((error) => {
+      console.log(error);
+      res.status(404).send("Nincs ilyen esemény.");
+    })
 });
 
 // GET event CSV export
 router.get('/:eventId/csvExport', async (req, res, next) => {
-  eventJSON = await data.retrieveEventJSON(req.params['eventId']);
-  if (eventJSON === null) {
-    return res.status(404).send('No event found.');
-  }
-  const fields = ['questionId', 'questionText', 'answers.answer', 'answers.name', 'answers.year', 'answers.city', 'answers.school', 'answers.timestamp'];
-  let csv = parser.parse(eventJSON, { fields, unwind: 'answers' });
-  res.attachment(req.params['eventId'] + '.csv');
-  return res.send(csv);
+  await data.retrieveEventJSON(req.params['eventId'])
+    .then((eventJSON) => {
+      const fields = [
+        'questionId',
+        'questionText',
+        'answers.answer',
+        'answers.name',
+        'answers.year',
+        'answers.city',
+        'answers.school',
+        'answers.timestamp'
+      ];
+      let csv = parser.parse(eventJSON, {
+          fields,
+          unwind: 'answers'
+      });
+      res.attachment(req.params['eventId'] + '.csv');
+      return res.send(csv);
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(404).send("Nincs ilyen esemény.");
+    })
 })
 
 // GET answers listing.
 router.get('/:eventId/:questionId', async (req, res, next) => {
-  question = await data.retrieveSingleQuestion(req.params['eventId'], req.params['questionId']);
-  answers = await data.retrieveAnswerRefs(req.params['eventId'], req.params['questionId']);
-  if (question !== null && answers !== null) {
-    return res.render('export/answers', {
+  await data.retrieveAnswerRefs(req.params['eventId'], req.params['questionId'])
+  .then((data) => res.render('export/answers', {
       eventId: req.params['eventId'],
       questionId: req.params['questionId'], // redundant ATM
-      question: question,
-      answers: answers
-    });
-  } else {
-    // Not found
-    return next();
-  }
+      question: data.questionData,
+      answers: data.answers
+  }))
+  .catch((error) => {
+    console.log(error);
+    res.status(404).send("Nincs ilyen kérdés.");
+  })
 });
 
 module.exports = router;

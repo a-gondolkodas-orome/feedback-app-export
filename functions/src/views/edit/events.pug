@@ -14,7 +14,7 @@ block content
   table
     thead
     tbody
-      each event, id in events
+      each event in events
         tr
           td(class='click')
-            a(id='entry', href='./#{id}/') #{id}
+            a(id='entry', href='./' + event.id + '/')= event.id

@@ -12,7 +12,7 @@ block content
       div.form-group
         label(for='id') Id:
         p(class='description') Rövid egyszavas azonosító.
-        input(type='text', name='id')
+        input(type='text', name='id', placeholder='esemeny')
 
     div.form-group
       label(for='code') Kód:
@@ -28,7 +28,7 @@ block content
       input(
         type='text',
         name='name',
-        placeholder='Név',
+        placeholder='Esemény neve',
         value= (undefined === data['name']) ? '' : data['name']
       )
     div.form-group
@@ -37,7 +37,7 @@ block content
       input(
         type='number',
         name='freq',
-        placeholder='0',
+        placeholder='60',
         value= (undefined === data['frequency']) ? '' : data['frequency']
       )
     div.form-group

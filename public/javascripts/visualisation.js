@@ -18,7 +18,7 @@ function scaleChart(ctx, numChoices) {
     var aggregate = new Array(numChoices);
     for ( var i = 1; i <= numChoices; i++ ) aggregate[i] = 0;
     answers.forEach((answer) => {
-        var ans = parseInt(answer.innerText);
+        var ans = parseInt(answer.innerHTML);
         aggregate[ans] = aggregate[ans] + 1;
     });
 
@@ -57,10 +57,12 @@ function wordCloudChart(ctx) {
     var aggregate = {};
     words.forEach((word) => aggregate[word] = 0);
 
-    answers.forEach((answer) => aggregate[answer.innerText] = aggregate[answer.innerText] + 1);
+    answers.forEach((answer) => aggregate[answer.innerHTML] = aggregate[answer.innerHTML] + 1);
     var aggregateArray = [];
     for ( var i = 0; i < words.length; i++ )
         aggregateArray.push(aggregate[words[i]]);
+
+    console.log(aggregateArray);
 
     var chart = new Chart(ctx, {
         type: 'bar',

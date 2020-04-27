@@ -25,6 +25,8 @@ app.use('/', indexRouter);
 app.use('/export', exportRouter);
 app.use('/edit', editRouter);
 
+app.use('/', express.static('../public'));
+
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   next(createError(404));

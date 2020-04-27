@@ -1,11 +1,27 @@
 extends ../layout
 
+block headscript
+  if question['type'] !== 'textbox'
+    script(
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.js"
+      integrity="sha256-nZaxPHA2uAaquixjSDX19TmIlbRNCOrf5HO1oHl5p70="
+      crossorigin="anonymous"
+    )
+    script(
+      src="/javascripts/visualisation.js"
+    )
+
 block content
   a(id='navigate', href='.') Vissza
 
   h1 Vélemények
 
-  h2= question["text"]
+  h2(id='question' type=question['type'])= question["text"]
+  if question['type'] === 'wordcloud'
+    input(id='words', type='hidden' value=JSON.stringify(question['words']))
+
+  if question['type'] !== 'textbox'
+    canvas(id='distribution', width='400', height='200')
 
   table
     thead
@@ -20,8 +36,9 @@ block content
       each answer, id in answers
         tr
           td= answer["name"].substring(0, 5) + '...'
-          td= answer["answer"]
+          td(class='answer')= answer["answer"]
           td= answer["year"]
           td= answer["city"]
           td= answer["school"]
           td= answer["timestamp"]
+

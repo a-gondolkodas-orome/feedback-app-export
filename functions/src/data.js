@@ -39,24 +39,34 @@ function retrieveQuestionRefs(eventId) {
 
 function retrieveAnswerRefs(eventId, questionId) {
   console.log('retrieving answers: ' + eventId + '.' + questionId);
-  let data = {
-    questionData: {},
-    answers: {}
-  };
-  return db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
-    .then((questionDoc) => {
-      if (!questionDoc.exists)
-        throw new Error("Question " + eventId + "." + questionId + " doesn't exist");
-      data.questionData = questionDoc.data();
-      return db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').orderBy('timestamp').get();
-    })
-    .then((answersSnapshot) => answersSnapshot.forEach((answerDoc) => {
-        data.answers[answerDoc.id] = answerDoc.data();
-        data.answers[answerDoc.id]['timestamp'] =
-          moment(data.answers[answerDoc.id]['timestamp'].toDate())
-            .tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm');
-    }))
-    .then(() => data)
+  return Promise.all([
+    Promise.all([
+      db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').orderBy('timestamp').get(),
+      getUserInfos()
+    ]).then(([answersSnapshot, userInfos]) => {
+      let answers = {};
+      answersSnapshot.forEach((answerDoc) => {
+        answers[answerDoc.id] = answerDoc.data();
+        answers[answerDoc.id]['timestamp'] = moment(answerDoc.data().timestamp.toDate())
+                                              .tz('Europe/Budapest').format('YYYY. MM. DD. HH:mm');
+        if (userInfos.hasOwnProperty(answerDoc.data().name)) {
+          let userInfo = userInfos[answerDoc.data().name];
+          answers[answerDoc.id] = Object.assign({}, answers[answerDoc.id], {
+            year: userInfo.year,
+            city: userInfo.city,
+            school: userInfo.school
+          });
+        }
+      });
+      return answers;
+    }),
+    db.collection('events').doc(eventId).collection('questions').doc(questionId).get()
+      .then((questionDoc) => {
+        if (!questionDoc.exists)
+          throw new Error("Question " + eventId + "." + questionId + " doesn't exist");
+        return questionDoc.data();
+      })
+  ])
 }
 
 
@@ -87,7 +97,7 @@ function retrieveQuestionJSON(eventId, questionId, userInfos) {
     .then(() => db.collection('events').doc(eventId).collection('questions').doc(questionId).collection('answers').get())
     .then((answersSnapshot) => answersSnapshot.forEach((answerDoc) => {
         let name = answerDoc.data().name;
-        let userInfo = userInfos[name] === undefined ? {
+        let userInfo = !userInfos.hasOwnProperty(name) ? {
                                                   year: undefined,
                                                   city: "",
                                                   school: ""

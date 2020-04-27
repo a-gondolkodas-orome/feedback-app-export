@@ -58,11 +58,11 @@ router.get('/:eventId/csvExport', async (req, res, next) => await
 // GET answers listing.
 router.get('/:eventId/:questionId', async (req, res, next) => await
   data.retrieveAnswerRefs(req.params['eventId'], req.params['questionId'])
-  .then((data) => res.render('export/answers', {
+  .then(([answers, question]) => res.render('export/answers', {
       eventId: req.params['eventId'],
       questionId: req.params['questionId'], // redundant ATM
-      question: data.questionData,
-      answers: data.answers
+      question: question,
+      answers: answers
   }))
   .catch((error) => {
     console.log(error);

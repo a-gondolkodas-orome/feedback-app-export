@@ -3,21 +3,25 @@ extends ../layout
 block content
   a(id='navigate', href='.') Vissza
 
-  h1= "Vélemények"
+  h1 Vélemények
 
   h2= question["text"]
 
   table
     thead
       tr
-        th id
-        th név/jelige
+        th anonim id
         th válasz
+        th évfolyam
+        th város
+        th iskola
         th timestamp
     tbody
       each answer, id in answers
         tr
-          td= id
-          td= answer["name"]
+          td= answer["name"].substring(0, 5) + '...'
           td= answer["answer"]
+          td= answer["year"]
+          td= answer["city"]
+          td= answer["school"]
           td= answer["timestamp"]

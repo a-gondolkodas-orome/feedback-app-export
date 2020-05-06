@@ -197,7 +197,10 @@ function addNewQuestion(eventId, question) {
       }
       return data;
     })
-    .then(db.collection('events').doc(eventId).collection('questions').doc(question['id']).set)
+    .then((data) => 
+      db.collection('events').doc(eventId).collection('questions').doc(question['id'])
+        .set(data)
+    )
     .then(() => console.log('New question added:', question['id']))
     .catch(console.log);
 }

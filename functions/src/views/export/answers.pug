@@ -8,13 +8,13 @@ block headscript
       crossorigin="anonymous"
     )
     script(
-      src="https://feedback-app-ago.firebaseapp.com/javascripts/visualisation.js"
+      src="/javascripts/visualisation.js"
     )
 
 block content
   a(id='navigate', href='.') Vissza
 
-  h1 Vélemények
+  h1 Válaszok
 
   h2(id='question' type=question['type'])= question["text"]
   if question['type'] === 'wordcloud'

@@ -16,9 +16,9 @@ function scaleChart(ctx, numChoices) {
     var answers = Array.from(document.getElementsByClassName('answer'));
 
     var aggregate = new Array(numChoices);
-    for ( var i = 1; i <= numChoices; i++ ) aggregate[i] = 0;
+    for ( var i = 0; i < numChoices; i++ ) aggregate[i] = 0;
     answers.forEach((answer) => {
-        var ans = parseInt(answer.innerHTML);
+        var ans = parseInt(answer.innerHTML) - 1;
         aggregate[ans] = aggregate[ans] + 1;
     });
 

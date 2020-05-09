@@ -132,7 +132,7 @@ function retrieveEventData(eventId) {
 }
 
 function addNewEvent(event) {
-  db.collection('events').doc(event['id']).set({
+  return db.collection('events').doc(event['id']).set({
     code: event['code'],
     name: event['name'],
     frequency: parseInt(event['freq']),
@@ -149,7 +149,7 @@ function addNewEvent(event) {
 }
 
 function updateExistingEvent(eventId, event) {
-  db.collection('events').doc(eventId).update({
+  return db.collection('events').doc(eventId).update({
     code: event['code'],
     name: event['name'],
     frequency: parseInt(event['freq']),
@@ -193,7 +193,7 @@ function addNewQuestion(eventId, question) {
       if (question['type'] === 'wordcloud') {
         data['words'] = [];
         for (var i = 0; i < question['numWords']; i++)
-          data['words'].push(data['word_'+i]);
+          data['words'].push(question['word_'+i]);
       }
       return data;
     })

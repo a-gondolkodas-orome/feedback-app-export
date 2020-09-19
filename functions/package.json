@@ -12,7 +12,7 @@
   },
   "author": "Gabor Pituk",
   "engines": {
-    "node": "8"
+    "node": "10"
   },
   "dependencies": {
     "@firebase/app": "^0.5.4",

@@ -31,7 +31,7 @@
     "json2csv": "^4.5.4",
     "minimist": "^1.2.5",
     "mkdirp": "^1.0.4",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "moment-timezone": "^0.5.28",
     "morgan": "~1.9.1",
     "pug": "^2.0.4"
